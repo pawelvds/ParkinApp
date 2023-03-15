@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ParkingApp.Data;
+using ParkinApp.Data;
 
 #nullable disable
 
@@ -26,12 +26,18 @@ namespace ParkinApp.Migrations
                     b.Property<bool>("IsReserved")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("ReservationEndTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("ReservationTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TimeZoneId")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -98,6 +104,51 @@ namespace ParkinApp.Migrations
                             IsReserved = false,
                             TimeZoneId = "UTC+1"
                         });
+                });
+
+            modelBuilder.Entity("ParkingApp.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ReservedSpotId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserTimeZoneId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservedSpotId")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ParkingApp.Entities.User", b =>
+                {
+                    b.HasOne("ParkingApp.Entities.ParkingSpot", "ReservedSpot")
+                        .WithOne("User")
+                        .HasForeignKey("ParkingApp.Entities.User", "ReservedSpotId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ReservedSpot");
+                });
+
+            modelBuilder.Entity("ParkingApp.Entities.ParkingSpot", b =>
+                {
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

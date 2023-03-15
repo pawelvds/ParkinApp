@@ -1,20 +1,24 @@
 using Microsoft.EntityFrameworkCore;
-using ParkingApp.Data;
+using ParkinApp.Data;
+using ParkinApp.Interfaces;
 using ParkingApp.Entities;
+using Microsoft.Extensions.Configuration;
+using ParkinApp.Extensions;
+using ParkinApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddDbContext<ParkingDbContext>(opt =>
-{
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+builder.Services.AddIdentityServices(builder.Configuration);
+
+builder.Services.AddApplicationServices(builder.Configuration);
+
 
 var app = builder.Build();
 

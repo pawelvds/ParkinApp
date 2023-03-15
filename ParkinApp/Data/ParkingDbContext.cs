@@ -1,8 +1,8 @@
-using ParkingApp.Entities;
 using Microsoft.EntityFrameworkCore;
+using ParkingApp.Configurations;
+using ParkingApp.Entities;
 
-
-namespace ParkingApp.Data;
+namespace ParkinApp.Data;
 
 public class ParkingDbContext : DbContext
 {
@@ -12,22 +12,11 @@ public class ParkingDbContext : DbContext
     }
 
     public DbSet<ParkingSpot> ParkingSpots { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ParkingSpot>()
-            .HasKey(ps => ps.Id);
-
-        // Initialization 10 spots
-        modelBuilder.Entity<ParkingSpot>()
-            .HasData(
-                Enumerable.Range(1, 10)
-                    .Select(i => new ParkingSpot
-                    {
-                        Id = i,
-                        IsReserved = false,
-                        ReservationTime = null,
-                        TimeZoneId = "UTC+1"
-                    }));
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkingSpotConfiguration());
     }
 }
