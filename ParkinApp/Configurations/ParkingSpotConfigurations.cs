@@ -11,6 +11,11 @@ namespace ParkingApp.Configurations
         {
             builder.HasKey(ps => ps.Id);
 
+            // Dodaj konfigurację relacji
+            builder.HasOne(ps => ps.User)
+                .WithOne(u => u.ReservedSpot)
+                .HasForeignKey<ParkingSpot>(ps => ps.UserId);
+
             // Initialization 10 spots
             builder.HasData(
                 Enumerable.Range(1, 10)

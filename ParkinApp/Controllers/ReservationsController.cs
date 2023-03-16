@@ -23,7 +23,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPost("{id}")]
-    public IActionResult CreateReservation(int id)
+    public async Task<ActionResult> CreateReservation(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
@@ -32,21 +32,18 @@ public class ReservationsController : ControllerBase
         }
 
         var user = _context.Users.FirstOrDefault(u => u.Login == userId);
-
-
-
         if (user == null)
         {
-            return Unauthorized("Invalid user.");
+            return NotFound("User not found.");
         }
 
-        if (user.ReservedSpot != null)
+        // Sprawdź, czy użytkownik ma już zarezerwowane miejsce parkingowe
+        if (user.ReservedSpotId != null)
         {
-            return BadRequest("User already has a reservation.");
+            return BadRequest("User already has a reserved parking spot.");
         }
 
-        var parkingSpot = _context.ParkingSpots.FirstOrDefault(ps => ps.Id == id);
-
+        var parkingSpot = await _context.ParkingSpots.FindAsync(id);
         if (parkingSpot == null)
         {
             return NotFound("Parking spot not found.");
@@ -58,34 +55,59 @@ public class ReservationsController : ControllerBase
         }
 
         parkingSpot.IsReserved = true;
-        parkingSpot.ReservationTime = DateTime.UtcNow;
         parkingSpot.UserId = user.Id;
+        parkingSpot.ReservationTime = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
+        DateTime reservationEndTime = new DateTime(now.Year, now.Month, now.Day).AddDays(1);
+        parkingSpot.ReservationEndTime = reservationEndTime;
+        parkingSpot.TimeZoneId = user.UserTimeZoneId;
 
-        _context.SaveChanges();
+        user.ReservedSpotId = parkingSpot.Id;
+
+        await _context.SaveChangesAsync();
 
         return Ok("Parking spot reserved.");
     }
 
-    [HttpDelete("{id}")]
-    public IActionResult DeleteReservation(int id)
-    {
-        var parkingSpot = _context.ParkingSpots.FirstOrDefault(ps => ps.Id == id);
 
+    [HttpDelete("cancelReservation")]
+    public async Task<IActionResult> CancelReservation()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Unauthorized("Invalid user.");
+        }
+
+        var user = _context.Users.FirstOrDefault(u => u.Login == userId);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        if (user.ReservedSpotId == null)
+        {
+            return BadRequest("User doesn't have any reserved spot.");
+        }
+
+        var parkingSpot = _context.ParkingSpots.FirstOrDefault(ps => ps.Id == user.ReservedSpotId);
         if (parkingSpot == null)
         {
-            return NotFound("Parking spot not found.");
+            return NotFound("Reserved parking spot not found.");
         }
 
-        if (!parkingSpot.IsReserved)
-        {
-            return BadRequest("Parking spot is not reserved.");
-        }
-
+        // Cancel reservation
         parkingSpot.IsReserved = false;
+        parkingSpot.UserId = null;
         parkingSpot.ReservationTime = null;
+        parkingSpot.ReservationEndTime = null;
 
-        _context.SaveChanges();
+        // Update user reservation
+        user.ReservedSpotId = null;
 
-        return Ok("Reservation canceled.");
+        await _context.SaveChangesAsync();
+
+        return Ok("Reservation cancelled.");
     }
+
 }

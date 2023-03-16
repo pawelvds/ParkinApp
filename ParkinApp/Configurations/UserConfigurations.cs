@@ -9,11 +9,13 @@ namespace ParkingApp.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasKey(u => u.Id);
+            builder.Property(u => u.Login).IsRequired().HasMaxLength(30);
+            builder.HasIndex(u => u.Login).IsUnique();
 
+            // Dodaj konfigurację relacji
             builder.HasOne(u => u.ReservedSpot)
                 .WithOne(ps => ps.User)
-                .HasForeignKey<User>(u => u.ReservedSpotId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasForeignKey<User>(u => u.ReservedSpotId);
         }
     }
 }
