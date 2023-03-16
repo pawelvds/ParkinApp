@@ -4,10 +4,12 @@ using ParkinApp.Data;
 using ParkinApp.DTOs;
 using ParkinApp.Interfaces;
 using ParkingApp.Entities;
+using System.Security.Claims;
 
 namespace ParkinApp.Controllers;
 
 [Authorize]
+[Route("api/Reservations")]
 public class ReservationsController : ControllerBase
 {
     private readonly ParkingDbContext _context;
@@ -21,9 +23,17 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPost("{id}")]
-    public IActionResult CreateReservation(int id, [FromBody] UserDto userCredentials)
+    public IActionResult CreateReservation(int id)
     {
-        var user = _context.Users.FirstOrDefault(u => u.Login == userCredentials.Username);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Unauthorized("Invalid user.");
+        }
+
+        var user = _context.Users.FirstOrDefault(u => u.Login == userId);
+
+
 
         if (user == null)
         {
@@ -55,7 +65,7 @@ public class ReservationsController : ControllerBase
 
         return Ok("Parking spot reserved.");
     }
-    
+
     [HttpDelete("{id}")]
     public IActionResult DeleteReservation(int id)
     {

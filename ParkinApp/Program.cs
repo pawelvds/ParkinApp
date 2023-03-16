@@ -1,10 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using ParkinApp.Data;
 using ParkinApp.Interfaces;
-using ParkingApp.Entities;
-using Microsoft.Extensions.Configuration;
 using ParkinApp.Extensions;
-using ParkinApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +15,6 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,6 +26,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); // Dodaj tę linię przed app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();

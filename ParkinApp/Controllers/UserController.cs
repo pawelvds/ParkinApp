@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
 using ParkinApp.Interfaces;
 using ParkingApp.Entities;
 using System.Threading.Tasks;
 using ParkinApp.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ParkinApp.Controllers
 {
@@ -28,10 +29,14 @@ namespace ParkinApp.Controllers
         {
             if (await _userRepository.UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
+            using var hmac = new HMACSHA512();
+
             var user = new User
             {
                 Login = registerDto.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password)
+                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
+                PasswordSalt = hmac.Key, // Dodaj tę linię
+                UserTimeZoneId = registerDto.UserTimeZoneId
             };
 
             _context.Users.Add(user);
@@ -40,10 +45,10 @@ namespace ParkinApp.Controllers
             return new UserDto
             {
                 Username = user.Login,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                UserTimeZoneId = user.UserTimeZoneId
             };
         }
-
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
@@ -52,18 +57,29 @@ namespace ParkinApp.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
-            // Sprawdź hasło
-            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+
+            for (int i = 0; i < computedHash.Length; i++)
             {
-                return Unauthorized("Invalid password");
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+            }
+
+            // Opcjonalnie: zaktualizuj strefę czasową użytkownika podczas logowania
+            if (!string.IsNullOrEmpty(loginDto.UserTimeZoneId))
+            {
+                user.UserTimeZoneId = loginDto.UserTimeZoneId;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
             }
 
             return new UserDto
             {
                 Username = user.Login,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                UserTimeZoneId = user.UserTimeZoneId // Dodaj tę linię
             };
         }
-
     }
 }
