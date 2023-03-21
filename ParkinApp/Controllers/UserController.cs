@@ -35,8 +35,7 @@ namespace ParkinApp.Controllers
             {
                 Login = registerDto.Username,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key,
-                UserTimeZoneId = registerDto.UserTimeZoneId
+                PasswordSalt = hmac.Key
             };
 
             _context.Users.Add(user);
@@ -46,7 +45,6 @@ namespace ParkinApp.Controllers
             {
                 Username = user.Login,
                 Token = _tokenService.CreateToken(user),
-                UserTimeZoneId = user.UserTimeZoneId
             };
         }
 
@@ -66,9 +64,19 @@ namespace ParkinApp.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            // Opcjonalnie: zaktualizuj strefę czasową użytkownika podczas logowania
+            // Walidacja UserTimeZoneId
             if (!string.IsNullOrEmpty(loginDto.UserTimeZoneId))
             {
+                try
+                {
+                    TimeZoneInfo.FindSystemTimeZoneById(loginDto.UserTimeZoneId);
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    return BadRequest("Invalid time zone ID.");
+                }
+
+                // Aktualizacja strefy czasowej użytkownika podczas logowania
                 user.UserTimeZoneId = loginDto.UserTimeZoneId;
                 _context.Update(user);
                 await _context.SaveChangesAsync();
@@ -78,8 +86,9 @@ namespace ParkinApp.Controllers
             {
                 Username = user.Login,
                 Token = _tokenService.CreateToken(user),
-                UserTimeZoneId = user.UserTimeZoneId 
+                UserTimeZoneId = user.UserTimeZoneId
             };
         }
+
     }
 }

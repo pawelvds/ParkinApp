@@ -8,5 +8,4 @@ public class RegisterDto
     public string Username { get; set; }
     [Required]
     public string Password { get; set; }
-    public string UserTimeZoneId { get; set; } 
 }
