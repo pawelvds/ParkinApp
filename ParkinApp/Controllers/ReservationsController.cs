@@ -15,6 +15,7 @@ public class ReservationsController : ControllerBase
     private readonly ParkingDbContext _context;
     
     private readonly ITokenService _tokenService;
+    private const string CentralEuropeanTimeZone = "Europe/Warsaw";
 
     public ReservationsController(ParkingDbContext context, ITokenService tokenService)
     {
@@ -37,7 +38,6 @@ public class ReservationsController : ControllerBase
             return NotFound("User not found.");
         }
 
-        // Sprawdź, czy użytkownik ma już zarezerwowane miejsce parkingowe
         if (user.ReservedSpotId != null)
         {
             return BadRequest("User already has a reserved parking spot.");
@@ -60,7 +60,7 @@ public class ReservationsController : ControllerBase
         DateTime now = DateTime.UtcNow;
         DateTime reservationEndTime = new DateTime(now.Year, now.Month, now.Day).AddDays(1);
         parkingSpot.ReservationEndTime = reservationEndTime;
-        parkingSpot.TimeZoneId = user.UserTimeZoneId;
+        parkingSpot.TimeZoneId = user.UserTimeZoneId ?? CentralEuropeanTimeZone;
 
         user.ReservedSpotId = parkingSpot.Id;
 

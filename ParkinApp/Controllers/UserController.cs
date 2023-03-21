@@ -35,7 +35,7 @@ namespace ParkinApp.Controllers
             {
                 Login = registerDto.Username,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key, // Dodaj tę linię
+                PasswordSalt = hmac.Key,
                 UserTimeZoneId = registerDto.UserTimeZoneId
             };
 
@@ -78,7 +78,7 @@ namespace ParkinApp.Controllers
             {
                 Username = user.Login,
                 Token = _tokenService.CreateToken(user),
-                UserTimeZoneId = user.UserTimeZoneId // Dodaj tę linię
+                UserTimeZoneId = user.UserTimeZoneId 
             };
         }
     }
