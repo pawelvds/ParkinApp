@@ -1,10 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using ParkinApp.Data;
 
 public class CleanupService : IHostedService, IDisposable
@@ -36,9 +30,9 @@ public class CleanupService : IHostedService, IDisposable
             try
             {
                 var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
-                var spotEndTimeInLocalTime = TimeZoneInfo.ConvertTimeFromUtc(spot.ReservationEndTime.Value, spotTimeZone);
+                var spotEndTimeInUtc = TimeZoneInfo.ConvertTimeToUtc(spot.ReservationEndTime.Value, spotTimeZone);
 
-                if (spotEndTimeInLocalTime <= utcNow)
+                if (spotEndTimeInUtc <= utcNow)
                 {
                     spot.IsReserved = false;
                     spot.UserId = null;
