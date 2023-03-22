@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.Data;
-using ParkinApp.DTOs;
 using ParkinApp.Interfaces;
-using ParkingApp.Entities;
 using System.Security.Claims;
 
 namespace ParkinApp.Controllers;
@@ -60,7 +58,8 @@ public class ReservationsController : ControllerBase
         DateTime now = DateTime.UtcNow;
         DateTime reservationEndTime = new DateTime(now.Year, now.Month, now.Day).AddDays(1);
         parkingSpot.ReservationEndTime = reservationEndTime;
-        parkingSpot.TimeZoneId = user.UserTimeZoneId ?? CentralEuropeanTimeZone;
+        parkingSpot.SpotTimeZoneId = CentralEuropeanTimeZone;
+        parkingSpot.UserTimeZoneId = user.UserTimeZoneId ?? CentralEuropeanTimeZone;
 
         user.ReservedSpotId = parkingSpot.Id;
 

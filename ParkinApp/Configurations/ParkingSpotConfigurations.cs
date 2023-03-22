@@ -1,7 +1,7 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ParkingApp.Entities;
-using System.Linq;
 
 namespace ParkingApp.Configurations
 {
@@ -15,6 +15,8 @@ namespace ParkingApp.Configurations
                 .WithOne(u => u.ReservedSpot)
                 .HasForeignKey<ParkingSpot>(ps => ps.UserId);
 
+            string defaultTimeZone = "Europe/Warsaw";
+
             builder.HasData(
                 Enumerable.Range(1, 10)
                     .Select(i => new ParkingSpot
@@ -23,7 +25,8 @@ namespace ParkingApp.Configurations
                         IsReserved = false,
                         ReservationTime = null,
                         UserId = null,
-                        TimeZoneId = "Europe/Warsaw"
+                        SpotTimeZoneId = defaultTimeZone,
+                        UserTimeZoneId = defaultTimeZone 
                     }));
         }
     }

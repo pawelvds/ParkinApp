@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
 using ParkinApp.Interfaces;
 using ParkingApp.Entities;
-using System.Threading.Tasks;
 using ParkinApp.Data;
 using System.Security.Cryptography;
 using System.Text;

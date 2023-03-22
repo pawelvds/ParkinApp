@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ParkinApp.Data;
 
-
 public class CleanupService : IHostedService, IDisposable
 {
     private Timer _timer;
@@ -30,14 +29,14 @@ public class CleanupService : IHostedService, IDisposable
         var context = scope.ServiceProvider.GetRequiredService<ParkingDbContext>();
 
         var utcNow = DateTime.UtcNow;
-        var parkingSpots = context.ParkingSpots.Include(ps => ps.User).Where(ps => ps.IsReserved && ps.ReservationEndTime != null && ps.TimeZoneId != null).ToList();
+        var parkingSpots = context.ParkingSpots.Include(ps => ps.User).Where(ps => ps.IsReserved && ps.ReservationEndTime != null && ps.SpotTimeZoneId != null).ToList();
 
         foreach (var spot in parkingSpots)
         {
             try
             {
-                var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.TimeZoneId);
-                var spotEndTimeInLocalTime = TimeZoneInfo.ConvertTimeFromUtc(spot.ReservationEndTime.Value, userTimeZone);
+                var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
+                var spotEndTimeInLocalTime = TimeZoneInfo.ConvertTimeFromUtc(spot.ReservationEndTime.Value, spotTimeZone);
 
                 if (spotEndTimeInLocalTime <= utcNow)
                 {
