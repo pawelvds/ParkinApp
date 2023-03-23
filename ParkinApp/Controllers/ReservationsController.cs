@@ -102,9 +102,6 @@ public class ReservationsController : ControllerBase
             return NotFound("Reserved parking spot not found.");
         }
         
-        // Get the user's new time zone
-        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.UserTimeZoneId);
-
         // Cancel reservation
         parkingSpot.IsReserved = false;
         parkingSpot.UserId = null;
@@ -115,7 +112,7 @@ public class ReservationsController : ControllerBase
         user.ReservedSpotId = null;
 
         // Update the user's time zone in the parking spot table
-        parkingSpot.UserTimeZoneId = user.UserTimeZoneId;
+        parkingSpot.UserTimeZoneId = parkingSpot.SpotTimeZoneId;
 
         await _context.SaveChangesAsync();
 
