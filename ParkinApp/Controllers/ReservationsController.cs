@@ -55,6 +55,8 @@ public class ReservationsController : ControllerBase
         parkingSpot.IsReserved = true;
         parkingSpot.UserId = user.Id;
 
+        var userTimeZoneId = user.UserTimeZoneId;
+
         var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(parkingSpot.SpotTimeZoneId);
         var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, spotTimeZone);
         parkingSpot.ReservationTime = localNow;
@@ -62,6 +64,8 @@ public class ReservationsController : ControllerBase
         DateTime reservationEndTime = new DateTime(localNow.Year, localNow.Month, localNow.Day, 23, 59, 59, DateTimeKind.Local);
         reservationEndTime = TimeZoneInfo.ConvertTime(reservationEndTime, spotTimeZone);
         parkingSpot.ReservationEndTime = reservationEndTime;
+
+        parkingSpot.UserTimeZoneId = userTimeZoneId;
 
         user.ReservedSpotId = parkingSpot.Id;
 
@@ -97,6 +101,9 @@ public class ReservationsController : ControllerBase
         {
             return NotFound("Reserved parking spot not found.");
         }
+        
+        // Get the user's new time zone
+        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.UserTimeZoneId);
 
         // Cancel reservation
         parkingSpot.IsReserved = false;
@@ -106,6 +113,9 @@ public class ReservationsController : ControllerBase
 
         // Update user reservation
         user.ReservedSpotId = null;
+
+        // Update the user's time zone in the parking spot table
+        parkingSpot.UserTimeZoneId = user.UserTimeZoneId;
 
         await _context.SaveChangesAsync();
 
