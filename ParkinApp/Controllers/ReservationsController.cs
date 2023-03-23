@@ -55,22 +55,20 @@ public class ReservationsController : ControllerBase
         parkingSpot.IsReserved = true;
         parkingSpot.UserId = user.Id;
 
-        var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(CentralEuropeanTimeZone);
+        var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(parkingSpot.SpotTimeZoneId);
         var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, spotTimeZone);
         parkingSpot.ReservationTime = localNow;
 
-        DateTime now = DateTime.UtcNow;
-        DateTime reservationEndTime = new DateTime(now.Year, now.Month, now.Day).AddDays(1);
+        DateTime reservationEndTime = new DateTime(localNow.Year, localNow.Month, localNow.Day, 23, 59, 59, DateTimeKind.Local);
+        reservationEndTime = TimeZoneInfo.ConvertTime(reservationEndTime, spotTimeZone);
         parkingSpot.ReservationEndTime = reservationEndTime;
-        parkingSpot.SpotTimeZoneId = CentralEuropeanTimeZone;
-        parkingSpot.UserTimeZoneId = user.UserTimeZoneId ?? CentralEuropeanTimeZone;
-
 
         user.ReservedSpotId = parkingSpot.Id;
 
         await _context.SaveChangesAsync();
 
         return Ok("Parking spot reserved.");
+        
     }
 
 

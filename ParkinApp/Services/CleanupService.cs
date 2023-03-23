@@ -30,7 +30,8 @@ public class CleanupService : IHostedService, IDisposable
             try
             {
                 var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
-                var spotEndTimeInUtc = TimeZoneInfo.ConvertTimeToUtc(spot.ReservationEndTime.Value, spotTimeZone);
+                var spotEndTimeInUtc = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 23, 59, 59, DateTimeKind.Utc);
+                spotEndTimeInUtc = TimeZoneInfo.ConvertTimeFromUtc(spotEndTimeInUtc, spotTimeZone);
 
                 if (spotEndTimeInUtc <= utcNow)
                 {
@@ -53,6 +54,7 @@ public class CleanupService : IHostedService, IDisposable
 
         context.SaveChanges();
     }
+
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
