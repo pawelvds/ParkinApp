@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
-using ParkinApp.Persistence.Data;
+using FluentValidation;
 
 namespace ParkinApp.Controllers
 {
@@ -15,18 +15,27 @@ namespace ParkinApp.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
-        private readonly ParkingDbContext _context;
+        private readonly IValidator<RegisterDto> _registerValidator;
+        private readonly IValidator<LoginDto> _loginValidator;
 
-        public UserController(IUserRepository userRepository, ITokenService tokenService, ParkingDbContext context)
+        public UserController(IUserRepository userRepository, ITokenService tokenService,
+            IValidator<RegisterDto> registerValidator, IValidator<LoginDto> loginValidator)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
-            _context = context;
+            _registerValidator = registerValidator;
+            _loginValidator = loginValidator;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
+            var validationResult = await _registerValidator.ValidateAsync(registerDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             if (await _userRepository.UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
             using var hmac = new HMACSHA512();
@@ -39,8 +48,7 @@ namespace ParkinApp.Controllers
                 UserTimeZoneId = "UTC"
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.AddAsync(user);
 
             return new UserDto
             {
@@ -52,6 +60,12 @@ namespace ParkinApp.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
+            var validationResult = await _loginValidator.ValidateAsync(loginDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var user = await _userRepository.GetUserByUsername(loginDto.Username);
 
             if (user == null) return Unauthorized("Invalid username");
@@ -65,25 +79,9 @@ namespace ParkinApp.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            // Walidacja UserTimeZoneId
-            if (string.IsNullOrEmpty(loginDto.UserTimeZoneId))
-            {
-                return BadRequest("User time zone ID is required.");
-            }
-
-            try
-            {
-                TimeZoneInfo.FindSystemTimeZoneById(loginDto.UserTimeZoneId);
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                return BadRequest("Invalid time zone ID.");
-            }
-
             // Aktualizacja strefy czasowej użytkownika podczas logowania
             user.UserTimeZoneId = loginDto.UserTimeZoneId;
-            _context.Update(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.UpdateAsync(user);
 
             return new UserDto
             {

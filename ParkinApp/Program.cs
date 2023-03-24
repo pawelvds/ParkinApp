@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Extensions;
+using ParkinApp.Persistence.Data;
 using ParkinApp.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,10 @@ builder.Services.AddSingleton<IHostedService, CleanupService>();
 builder.Services.AddIdentityServices(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
+
+// Rejestracja ParkingDbContext
+builder.Services.AddDbContext<ParkingDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

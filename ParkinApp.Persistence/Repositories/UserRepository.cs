@@ -1,23 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
-using ParkinApp.Persistence.Data;
 using ParkingApp.Entities;
+using System.Threading.Tasks;
+using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Persistence.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly ParkingDbContext _context;
 
-        public UserRepository(ParkingDbContext context)
+        public UserRepository(ParkingDbContext context) : base(context)
         {
             _context = context;
-        }
-
-        public async Task<User> GetUserByUsername(string username)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Login == username) ??
-                   throw new ArgumentException("x");
         }
 
         public async Task<bool> UserExists(string username)
@@ -25,14 +20,9 @@ namespace ParkinApp.Persistence.Repositories
             return await _context.Users.AnyAsync(u => u.Login == username);
         }
 
-        public Task<User> GetByIdAsync(int id)
+        public async Task<User> GetUserByUsername(string username)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<User>> GetAllAsync()
-        {
-            throw new NotImplementedException();
+            return await _context.Users.FirstOrDefaultAsync(u => u.Login == username);
         }
     }
 }
