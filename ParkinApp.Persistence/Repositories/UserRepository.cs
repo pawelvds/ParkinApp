@@ -25,5 +25,15 @@ namespace ParkinApp.Data
         {
             return await _context.Users.AnyAsync(u => u.Login == username);
         }
+
+        public Task<User> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<User>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
