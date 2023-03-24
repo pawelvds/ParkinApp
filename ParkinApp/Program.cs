@@ -1,6 +1,6 @@
-using ParkinApp.Data;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Extensions;
+using ParkinApp.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

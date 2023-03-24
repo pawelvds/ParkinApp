@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
 using ParkingApp.Entities;
-using ParkinApp.Data;
 using System.Security.Cryptography;
 using System.Text;
 using ParkinApp.Domain.Abstractions.Repositories;

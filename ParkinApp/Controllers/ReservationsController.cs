@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ParkinApp.Data;
 using System.Security.Claims;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Persistence.Data;

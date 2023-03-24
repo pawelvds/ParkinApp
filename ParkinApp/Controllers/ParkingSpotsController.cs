@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using ParkinApp.Data;
 using ParkinApp.DTOs;
 using ParkinApp.Persistence.Data;
 

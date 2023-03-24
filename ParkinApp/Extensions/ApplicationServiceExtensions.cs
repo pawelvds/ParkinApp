@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using ParkinApp.Data;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Persistence.Data;
 
