@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
-using ParkingApp.Entities;
-using System.Security.Cryptography;
-using System.Text;
-using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using FluentValidation;
+using System.Threading.Tasks;
 
 namespace ParkinApp.Controllers
 {
@@ -13,16 +10,14 @@ namespace ParkinApp.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
         private readonly IValidator<RegisterDto> _registerValidator;
         private readonly IValidator<LoginDto> _loginValidator;
 
-        public UserController(IUserRepository userRepository, ITokenService tokenService,
+        public UserController(IUserService userService,
             IValidator<RegisterDto> registerValidator, IValidator<LoginDto> loginValidator)
         {
-            _userRepository = userRepository;
-            _tokenService = tokenService;
+            _userService = userService;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
         }
@@ -36,25 +31,15 @@ namespace ParkinApp.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            if (await _userRepository.UserExists(registerDto.Username)) return BadRequest("Username is taken");
-
-            using var hmac = new HMACSHA512();
-
-            var user = new User
+            try
             {
-                Login = registerDto.Username,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key,
-                UserTimeZoneId = "UTC"
-            };
-
-            await _userRepository.AddAsync(user);
-
-            return new UserDto
+                var userDto = await _userService.RegisterAsync(registerDto);
+                return userDto;
+            }
+            catch (ArgumentException e)
             {
-                Username = user.Login,
-                Token = _tokenService.CreateToken(user),
-            };
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("login")]
@@ -66,29 +51,15 @@ namespace ParkinApp.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            var user = await _userRepository.GetUserByUsername(loginDto.Username);
-
-            if (user == null) return Unauthorized("Invalid username");
-
-            using var hmac = new HMACSHA512(user.PasswordSalt);
-
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-
-            for (int i = 0; i < computedHash.Length; i++)
+            try
             {
-                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+                var userDto = await _userService.LoginAsync(loginDto);
+                return userDto;
             }
-
-            // Aktualizacja strefy czasowej użytkownika podczas logowania
-            user.UserTimeZoneId = loginDto.UserTimeZoneId;
-            await _userRepository.UpdateAsync(user);
-
-            return new UserDto
+            catch (UnauthorizedAccessException)
             {
-                Username = user.Login,
-                Token = _tokenService.CreateToken(user),
-                UserTimeZoneId = user.UserTimeZoneId
-            };
+                return Unauthorized("Invalid credentials");
+            }
         }
     }
 }

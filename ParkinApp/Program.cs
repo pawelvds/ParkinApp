@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using ParkinApp.Application.Services;
 using ParkinApp.Domain.Abstractions.Repositories;
+using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Extensions;
 using ParkinApp.Persistence.Data;
 using ParkinApp.Persistence.Repositories;
@@ -13,12 +15,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IHostedService, CleanupService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 builder.Services.AddIdentityServices(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
-// Rejestracja ParkingDbContext
+// Registration ParkingDbContext
 builder.Services.AddDbContext<ParkingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
