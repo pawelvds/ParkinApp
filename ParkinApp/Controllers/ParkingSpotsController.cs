@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.Data;
 using ParkinApp.DTOs;
-
+using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Controllers;
 
@@ -17,13 +17,13 @@ public class ParkingSpotsController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetParkingSpots()
+    public async Task<IActionResult> GetParkingSpots()
     {
         var parkingSpots = _context.ParkingSpots
             .Select(ps => new ParkingSpotDto
             {
                 Id = ps.Id,
-                IsReserved = ps.IsReserved
+                IsReserved = ps.IsReserved //////
             })
             .ToList();
 

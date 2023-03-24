@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Data;
-using ParkinApp.Interfaces;
+using ParkinApp.Domain.Abstractions.Services;
+using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Extensions;
 

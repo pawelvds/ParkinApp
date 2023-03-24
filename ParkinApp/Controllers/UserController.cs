@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
-using ParkinApp.Interfaces;
 using ParkingApp.Entities;
 using ParkinApp.Data;
 using System.Security.Cryptography;
 using System.Text;
+using ParkinApp.Domain.Abstractions.Repositories;
+using ParkinApp.Domain.Abstractions.Services;
+using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Controllers
 {
