@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ParkinApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,13 +17,13 @@ namespace ParkinApp.Persistence.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Login = table.Column<string>(type: "TEXT", maxLength: 30, nullable: false),
-                    PasswordHash = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    PasswordSalt = table.Column<byte[]>(type: "BLOB", nullable: false),
-                    ReservedSpotId = table.Column<int>(type: "INTEGER", nullable: true),
-                    UserTimeZoneId = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Login = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    ReservedSpotId = table.Column<int>(type: "int", nullable: true),
+                    UserTimeZoneId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,14 +34,14 @@ namespace ParkinApp.Persistence.Migrations
                 name: "ParkingSpots",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    IsReserved = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ReservationTime = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ReservationEndTime = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    SpotTimeZoneId = table.Column<string>(type: "TEXT", nullable: false),
-                    UserTimeZoneId = table.Column<string>(type: "TEXT", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IsReserved = table.Column<bool>(type: "bit", nullable: false),
+                    ReservationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReservationEndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SpotTimeZoneId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserTimeZoneId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,7 +74,8 @@ namespace ParkinApp.Persistence.Migrations
                 name: "IX_ParkingSpots_UserId",
                 table: "ParkingSpots",
                 column: "UserId",
-                unique: true);
+                unique: true,
+                filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Login",

@@ -11,7 +11,7 @@ public static class ApplicationServiceExtensions
     {
         services.AddDbContext<ParkingDbContext>(opt =>
         {
-            opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
         }); 
         services.AddCors();
         services.AddScoped<ITokenService, TokenService>();
