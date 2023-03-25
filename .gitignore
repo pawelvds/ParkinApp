@@ -3,5 +3,5 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-appsettings.Development.json
-appsettings.json
+/ParkinApp/appsettings.Development.json
+/ParkinApp/appsettings.json
