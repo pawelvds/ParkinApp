@@ -20,7 +20,7 @@ namespace ParkinApp.Persistence.Repositories
             return await _context.Users.AnyAsync(u => u.Login == username);
         }
 
-        public async Task<User> GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Login == username);
         }

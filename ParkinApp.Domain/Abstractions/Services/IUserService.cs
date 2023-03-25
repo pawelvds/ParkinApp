@@ -1,3 +1,4 @@
+using ParkinApp.Domain.Common;
 using ParkinApp.DTOs;
 using System.Threading.Tasks;
 
@@ -5,7 +6,7 @@ namespace ParkinApp.Domain.Abstractions.Services
 {
     public interface IUserService
     {
-        Task<UserDto> RegisterAsync(RegisterDto registerDto);
-        Task<UserDto> LoginAsync(LoginDto loginDto);
+        Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto);
+        Task<Result<UserDto>> LoginAsync(LoginDto loginDto);
     }
 }

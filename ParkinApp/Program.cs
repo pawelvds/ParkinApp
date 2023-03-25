@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using ParkinApp.Application.Services;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Extensions;
 using ParkinApp.Persistence.Data;
 using ParkinApp.Persistence.Repositories;
+using ParkinApp.Services;
+using FluentValidation.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,11 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 // Use ApplicationServiceExtensions to register DbContext and other services.
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddControllers().AddFluentValidation(fv =>
+{
+    fv.RegisterValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
+});
 
 var app = builder.Build();
 

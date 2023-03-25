@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
 using ParkinApp.Domain.Abstractions.Services;
-using FluentValidation;
-using System.Threading.Tasks;
+using ParkinApp.DTOs;
+using ParkinApp.Domain.Common;
+
 
 namespace ParkinApp.Controllers
 {
@@ -11,55 +12,34 @@ namespace ParkinApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IValidator<RegisterDto> _registerValidator;
-        private readonly IValidator<LoginDto> _loginValidator;
 
-        public UserController(IUserService userService,
-            IValidator<RegisterDto> registerValidator, IValidator<LoginDto> loginValidator)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _registerValidator = registerValidator;
-            _loginValidator = loginValidator;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+        public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            var validationResult = await _registerValidator.ValidateAsync(registerDto);
-            if (!validationResult.IsValid)
+            var result = await _userService.RegisterAsync(registerDto);
+            if (result.IsSuccessful)
             {
-                return BadRequest(validationResult.Errors);
+                return Ok(result.Value);
             }
 
-            try
-            {
-                var userDto = await _userService.RegisterAsync(registerDto);
-                return userDto;
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
-            }
+            return BadRequest(result.Errors);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var validationResult = await _loginValidator.ValidateAsync(loginDto);
-            if (!validationResult.IsValid)
+            var result = await _userService.LoginAsync(loginDto);
+            if (result.IsSuccessful)
             {
-                return BadRequest(validationResult.Errors);
+                return Ok(result.Value);
             }
 
-            try
-            {
-                var userDto = await _userService.LoginAsync(loginDto);
-                return userDto;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Unauthorized("Invalid credentials");
-            }
+            return Unauthorized(result.Errors);
         }
     }
 }
