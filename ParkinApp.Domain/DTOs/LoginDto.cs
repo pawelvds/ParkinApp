@@ -1,11 +1,3 @@
-using System.ComponentModel.DataAnnotations;
+namespace ParkinApp.Domain.DTOs;
 
-namespace ParkinApp.DTOs;
-
-public class LoginDto
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
-    [Required]
-    public string UserTimeZoneId { get; set; } 
-}
+public record LoginDto(string Username, string Password, string UserTimeZoneId);

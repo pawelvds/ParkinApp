@@ -4,7 +4,7 @@ using FluentValidation;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
-using ParkinApp.DTOs;
+using ParkinApp.Domain.DTOs;
 using ParkingApp.Entities;
 
 namespace ParkinApp.Services
@@ -48,11 +48,11 @@ namespace ParkinApp.Services
 
             await _userRepository.AddAsync(user);
 
-            return Result<UserDto>.Success(new UserDto
-            {
-                Username = user.Login,
-                Token = _tokenService.CreateToken(user),
-            });
+            return Result<UserDto>.Success(new UserDto(
+                user.Login,
+                _tokenService.CreateToken(user),
+                user.UserTimeZoneId
+            ));
         }
 
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
@@ -82,12 +82,11 @@ namespace ParkinApp.Services
             user.UserTimeZoneId = loginDto.UserTimeZoneId;
             await _userRepository.UpdateAsync(user);
 
-            return Result<UserDto>.Success(new UserDto
-            {
-                Username = user.Login,
-                Token = _tokenService.CreateToken(user),
-                UserTimeZoneId = user.UserTimeZoneId
-            });
+            return Result<UserDto>.Success(new UserDto(
+                user.Login,
+                _tokenService.CreateToken(user),
+                user.UserTimeZoneId
+            ));
         }
     }
 }

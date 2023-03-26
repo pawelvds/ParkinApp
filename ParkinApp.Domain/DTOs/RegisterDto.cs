@@ -1,11 +1,3 @@
-using System.ComponentModel.DataAnnotations;
+namespace ParkinApp.Domain.DTOs;
 
-namespace ParkinApp.DTOs;
-
-public class RegisterDto
-{
-    [Required]
-    public string Username { get; set; }
-    [Required]
-    public string Password { get; set; }
-}
+public record RegisterDto(string Username, string Password);

@@ -1,8 +1,3 @@
-namespace ParkinApp.DTOs;
+namespace ParkinApp.Domain.DTOs;
 
-public class UserDto
-{
-    public string Username { get; set; }
-    public string Token { get; set; }
-    public string UserTimeZoneId { get; set; } 
-}
+public record UserDto(string Username, string Token, string UserTimeZoneId);

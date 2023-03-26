@@ -20,10 +20,9 @@ public class ParkingSpotService : IParkingSpotService
     public async Task<List<ParkingSpotDto>> GetAllParkingSpotsAsync()
     {
         var parkingSpots = await _parkingSpotRepository.GetAllAsync();
-        return parkingSpots.Select(ps => new ParkingSpotDto
-        {
-            Id = ps.Id,
-            IsReserved = ps.IsReserved
-        }).ToList();
+        return parkingSpots.Select(ps => new ParkingSpotDto(
+            ps.Id,
+            ps.IsReserved
+        )).ToList();
     }
 }
