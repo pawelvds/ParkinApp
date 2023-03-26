@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ParkinApp.Domain.Abstractions.Services;
+using ParkinApp.Domain.DTOs;
 using ParkinApp.DTOs;
 
 namespace ParkinApp.Controllers

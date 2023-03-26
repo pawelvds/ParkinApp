@@ -1,4 +1,5 @@
 using FluentValidation;
+using ParkinApp.Domain.DTOs;
 using ParkinApp.DTOs;
 
 public class CreateReservationDtoValidator : AbstractValidator<CreateReservationDto>

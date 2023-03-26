@@ -1,6 +1,9 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
+using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.DTOs;
 using ParkinApp.Persistence.Data;
+using ParkinApp.Validators;
 
 namespace ParkinApp.Controllers;
 
@@ -8,24 +11,22 @@ namespace ParkinApp.Controllers;
 [Route("api/[controller]")]
 public class ParkingSpotsController : ControllerBase
 {
-    private readonly ParkingDbContext _context;
+    private readonly IParkingSpotService _parkingSpotService;
 
-    public ParkingSpotsController(ParkingDbContext context)
+    public ParkingSpotsController(IParkingSpotService parkingSpotService)
     {
-        _context = context;
+        _parkingSpotService = parkingSpotService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetParkingSpots()
+    public async Task<IActionResult> GetParkingSpots([CustomizeValidator] GetParkingSpotsRequestValidator validator)
     {
-        var parkingSpots = _context.ParkingSpots
-            .Select(ps => new ParkingSpotDto
-            {
-                Id = ps.Id,
-                IsReserved = ps.IsReserved //////
-            })
-            .ToList();
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
 
+        var parkingSpots = await _parkingSpotService.GetAllParkingSpotsAsync();
         return Ok(parkingSpots);
     }
 }

@@ -2,6 +2,7 @@ using FluentValidation;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
+using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
 using ParkinApp.DTOs;
 

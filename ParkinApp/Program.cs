@@ -19,6 +19,7 @@ builder.Services.AddSingleton<IHostedService, CleanupService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 
 builder.Services.AddIdentityServices(builder.Configuration);
 
