@@ -34,10 +34,9 @@ public class CleanupService : IHostedService, IDisposable
                 if (spot.SpotTimeZoneId != null)
                 {
                     var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
-                    var spotEndTimeInUtc = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 23, 59, 59, DateTimeKind.Utc);
-                    spotEndTimeInUtc = TimeZoneInfo.ConvertTimeFromUtc(spotEndTimeInUtc, spotTimeZone);
-
-                    if (spotEndTimeInUtc <= utcNow)
+                    var spotEndTimeInLocal = TimeZoneInfo.ConvertTimeToUtc(spot.ReservationEndTime.Value, spotTimeZone);
+                
+                    if (spotEndTimeInLocal <= utcNow)
                     {
                         spot.IsReserved = false;
                         spot.UserId = null;
@@ -59,7 +58,6 @@ public class CleanupService : IHostedService, IDisposable
 
         context.SaveChanges();
     }
-
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
