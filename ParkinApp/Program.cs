@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
@@ -6,6 +7,7 @@ using ParkinApp.Persistence.Data;
 using ParkinApp.Persistence.Repositories;
 using ParkinApp.Services;
 using FluentValidation.AspNetCore;
+using ParkinApp.Domain.Entities;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
+builder.Services.AddTransient<IValidator<ParkingSpot>, ParkingSpotValidator>();
 
 builder.Services.AddIdentityServices(builder.Configuration);
 
