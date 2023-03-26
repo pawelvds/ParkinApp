@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Persistence.Data;
 
+namespace ParkinApp.Services;
+
 public class CleanupService : IHostedService, IDisposable
 {
     private Timer _timer;
@@ -29,20 +31,23 @@ public class CleanupService : IHostedService, IDisposable
         {
             try
             {
-                var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
-                var spotEndTimeInUtc = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 23, 59, 59, DateTimeKind.Utc);
-                spotEndTimeInUtc = TimeZoneInfo.ConvertTimeFromUtc(spotEndTimeInUtc, spotTimeZone);
-
-                if (spotEndTimeInUtc <= utcNow)
+                if (spot.SpotTimeZoneId != null)
                 {
-                    spot.IsReserved = false;
-                    spot.UserId = null;
-                    spot.ReservationTime = null;
-                    spot.ReservationEndTime = null;
+                    var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
+                    var spotEndTimeInUtc = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 23, 59, 59, DateTimeKind.Utc);
+                    spotEndTimeInUtc = TimeZoneInfo.ConvertTimeFromUtc(spotEndTimeInUtc, spotTimeZone);
 
-                    if (spot.User != null)
+                    if (spotEndTimeInUtc <= utcNow)
                     {
-                        spot.User.ReservedSpotId = null;
+                        spot.IsReserved = false;
+                        spot.UserId = null;
+                        spot.ReservationTime = null;
+                        spot.ReservationEndTime = null;
+
+                        if (spot.User != null)
+                        {
+                            spot.User.ReservedSpotId = null;
+                        }
                     }
                 }
             }

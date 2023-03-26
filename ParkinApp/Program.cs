@@ -17,6 +17,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IHostedService, CleanupService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 builder.Services.AddIdentityServices(builder.Configuration);
 

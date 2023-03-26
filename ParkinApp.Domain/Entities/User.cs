@@ -1,3 +1,5 @@
+using ParkinApp.Domain.Entities;
+
 namespace ParkingApp.Entities
 {
     public class User

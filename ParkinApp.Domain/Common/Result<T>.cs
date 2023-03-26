@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FluentValidation.Results;
 
 namespace ParkinApp.Domain.Common
 {
@@ -21,6 +22,15 @@ namespace ParkinApp.Domain.Common
         public static Result<T> Failure(string error)
         {
             return new Result<T> { IsSuccessful = false, Errors = new List<string> { error } };
+        }
+
+        public static Result<T> Failure(List<ValidationFailure> validationResultErrors)
+        {
+            return new Result<T>
+            {
+                IsSuccessful = false,
+                Errors = validationResultErrors.Select(e => e.ErrorMessage).ToList()
+            };
         }
     }
 }

@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.DTOs;
 using ParkinApp.Domain.Abstractions.Services;
-using ParkinApp.DTOs;
-using ParkinApp.Domain.Common;
 
 
 namespace ParkinApp.Controllers
