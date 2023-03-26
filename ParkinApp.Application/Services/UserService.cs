@@ -63,6 +63,7 @@ namespace ParkinApp.Services
                 return Result<UserDto>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
             }
 
+
             var user = await _userRepository.GetUserByUsername(loginDto.Username);
 
             if (user == null)
