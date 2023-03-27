@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.Extensions.Caching.Memory;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
@@ -13,14 +14,39 @@ namespace ParkinApp.Services
         private readonly IUserRepository _userRepository;
         private readonly IValidator<CreateReservationDto> _createReservationValidator;
         private readonly IValidator<ParkingSpot> _parkingSpotValidator;
+        private readonly IMemoryCache _cache;
 
         public ReservationService(IParkingSpotRepository parkingSpotRepository, IUserRepository userRepository,
-            IValidator<CreateReservationDto> createReservationValidator, IValidator<ParkingSpot> parkingSpotValidator)
+            IValidator<CreateReservationDto> createReservationValidator, IValidator<ParkingSpot> parkingSpotValidator, IMemoryCache cache)
         {
             _parkingSpotRepository = parkingSpotRepository;
             _userRepository = userRepository;
             _createReservationValidator = createReservationValidator;
             _parkingSpotValidator = parkingSpotValidator;
+            _cache = cache;
+        }
+        
+        private const string ParkingSpotCacheKeyPrefix = "ParkingSpot_";
+
+        private async Task<ParkingSpot> GetParkingSpotByIdAsync(int parkingSpotId)
+        {
+            if (!_cache.TryGetValue(GetParkingSpotCacheKey(parkingSpotId), out ParkingSpot parkingSpot))
+            {
+                parkingSpot = await _parkingSpotRepository.GetParkingSpotByIdAsync(parkingSpotId);
+                _cache.Set(GetParkingSpotCacheKey(parkingSpotId), parkingSpot);
+            }
+
+            return parkingSpot;
+        }
+
+        private void UpdateParkingSpotCache(ParkingSpot parkingSpot)
+        {
+            _cache.Set(GetParkingSpotCacheKey(parkingSpot.Id), parkingSpot);
+        }
+
+        private string GetParkingSpotCacheKey(int parkingSpotId)
+        {
+            return $"{ParkingSpotCacheKeyPrefix}{parkingSpotId}";
         }
 
         public async Task<Result<ReservationResultDto>> CreateReservationAsync(CreateReservationDto reservationDto,
@@ -39,7 +65,7 @@ namespace ParkinApp.Services
                 return Result<ReservationResultDto>.Failure("User not found.");
             }
 
-            var parkingSpot = await _parkingSpotRepository.GetParkingSpotByIdAsync(reservationDto.ParkingSpotId);
+            var parkingSpot = await GetParkingSpotByIdAsync(reservationDto.ParkingSpotId);
             if (parkingSpot == null)
             {
                 return Result<ReservationResultDto>.Failure("Parking spot not found.");
@@ -87,7 +113,6 @@ namespace ParkinApp.Services
 
             return Result<ReservationResultDto>.Success(reservationResultDto);
         }
-
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {
             var user = await _userRepository.GetUserByUsername(userId);
@@ -101,7 +126,7 @@ namespace ParkinApp.Services
                 return Result<string>.Failure("User doesn't have any reserved spot.");
             }
 
-            var parkingSpot = await _parkingSpotRepository.GetParkingSpotByIdAsync(user.ReservedSpotId.Value);
+            var parkingSpot = await GetParkingSpotByIdAsync(user.ReservedSpotId.Value);
             if (parkingSpot == null)
             {
                 return Result<string>.Failure("Reserved parking spot not found.");
@@ -116,7 +141,9 @@ namespace ParkinApp.Services
             await _parkingSpotRepository.UpdateAsync(parkingSpot);
 
             user.ReservedSpotId = null;
-            await _userRepository.UpdateAsync(user);
+
+            await _parkingSpotRepository.UpdateAsync(parkingSpot);
+            UpdateParkingSpotCache(parkingSpot);
 
             return Result<string>.Success("Reservation cancelled.");
         }

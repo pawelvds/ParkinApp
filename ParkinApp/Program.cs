@@ -23,6 +23,7 @@ builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 builder.Services.AddTransient<IValidator<ParkingSpot>, ParkingSpotValidator>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddIdentityServices(builder.Configuration);
 

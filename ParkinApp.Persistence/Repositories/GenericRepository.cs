@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ParkinApp.Persistence.Repositories
 {
@@ -9,7 +7,7 @@ namespace ParkinApp.Persistence.Repositories
     {
         private readonly DbContext _context;
 
-        public GenericRepository(DbContext context)
+        protected GenericRepository(DbContext context)
         {
             _context = context;
         }
@@ -32,10 +30,23 @@ namespace ParkinApp.Persistence.Repositories
 
         public async Task UpdateAsync(T entity)
         {
-            _context.Set<T>().Update(entity);
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var primaryKey = entityType.FindPrimaryKey();
+            var keyValues = primaryKey.Properties.Select(p => p.PropertyInfo.GetValue(entity)).ToArray();
+            var trackedEntity = await _context.Set<T>().FindAsync(keyValues);
+
+            if (trackedEntity != null)
+            {
+                _context.Entry(trackedEntity).CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                _context.Set<T>().Update(entity);
+            }
+
             await _context.SaveChangesAsync();
         }
-
+        
         public async Task DeleteAsync(T entity)
         {
             _context.Set<T>().Remove(entity);
