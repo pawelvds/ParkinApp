@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
-using ParkingApp.Entities;
+using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Persistence.Repositories

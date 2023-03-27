@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Services;
 
 public class CleanupService : IHostedService, IDisposable
 {
-    private Timer _timer;
+    private Timer? _timer;
     private readonly IServiceScopeFactory _scopeFactory;
 
     public CleanupService(IServiceScopeFactory scopeFactory)
@@ -19,7 +20,7 @@ public class CleanupService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    private void Cleanup(object state)
+    private void Cleanup(object? state)
     {
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ParkingDbContext>();
@@ -31,22 +32,14 @@ public class CleanupService : IHostedService, IDisposable
         {
             try
             {
-                if (spot.SpotTimeZoneId != null)
+                if (spot.ReservationEndTime.HasValue && !string.IsNullOrEmpty(spot.SpotTimeZoneId))
                 {
                     var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
                     var spotEndTimeInLocal = TimeZoneInfo.ConvertTimeToUtc(spot.ReservationEndTime.Value, spotTimeZone);
-                
+
                     if (spotEndTimeInLocal <= utcNow)
                     {
-                        spot.IsReserved = false;
-                        spot.UserId = null;
-                        spot.ReservationTime = null;
-                        spot.ReservationEndTime = null;
-
-                        if (spot.User != null)
-                        {
-                            spot.User.ReservedSpotId = null;
-                        }
+                        CleanupReservation(spot);
                     }
                 }
             }
@@ -57,6 +50,19 @@ public class CleanupService : IHostedService, IDisposable
         }
 
         context.SaveChanges();
+    }
+
+    private void CleanupReservation(ParkingSpot spot)
+    {
+        spot.IsReserved = false;
+        spot.UserId = null;
+        spot.ReservationTime = null;
+        spot.ReservationEndTime = null;
+
+        if (spot.User != null)
+        {
+            spot.User.ReservedSpotId = null;
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

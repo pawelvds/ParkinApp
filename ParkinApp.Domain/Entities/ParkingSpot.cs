@@ -1,5 +1,3 @@
-using ParkingApp.Entities;
-
 namespace ParkinApp.Domain.Entities;
 
 public class ParkingSpot

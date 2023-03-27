@@ -1,7 +1,6 @@
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Data;
-using ParkingApp.Entities;
 
 namespace ParkinApp.Persistence.Repositories
 {

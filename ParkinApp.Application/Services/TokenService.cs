@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
-using ParkingApp.Entities;
+using ParkinApp.Domain.Entities;
 
 public class TokenService : ITokenService
 {

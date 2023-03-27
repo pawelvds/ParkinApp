@@ -5,7 +5,7 @@ using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
 using ParkinApp.Domain.DTOs;
-using ParkingApp.Entities;
+using ParkinApp.Domain.Entities;
 
 namespace ParkinApp.Services
 {

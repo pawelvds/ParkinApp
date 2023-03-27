@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Configurations;
-using ParkingApp.Entities;
 
 namespace ParkinApp.Persistence.Data;
 

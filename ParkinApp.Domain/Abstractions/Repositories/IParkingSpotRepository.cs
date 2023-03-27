@@ -1,5 +1,4 @@
 using ParkinApp.Domain.Entities;
-using ParkingApp.Entities;
 
 namespace ParkinApp.Domain.Abstractions.Repositories
 {
