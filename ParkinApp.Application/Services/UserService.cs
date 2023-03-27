@@ -27,12 +27,6 @@ namespace ParkinApp.Services
 
         public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto)
         {
-            var validationResult = await _registerValidator.ValidateAsync(registerDto);
-            if (!validationResult.IsValid)
-            {
-                return Result<UserDto>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
-            }
-
             if (await _userRepository.UserExists(registerDto.Username))
                 return Result<UserDto>.Failure(new List<string> { "Username is taken" });
 
@@ -54,6 +48,7 @@ namespace ParkinApp.Services
                 user.UserTimeZoneId
             ));
         }
+
 
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
         {

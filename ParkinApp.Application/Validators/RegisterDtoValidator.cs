@@ -1,6 +1,5 @@
 using FluentValidation;
 using ParkinApp.Domain.DTOs;
-using ParkinApp.DTOs;
 
 namespace ParkinApp.Validators;
 
