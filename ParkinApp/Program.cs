@@ -7,13 +7,11 @@ using ParkinApp.Services;
 using FluentValidation.AspNetCore;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
-using ParkinApp.DTOs;
+using ParkinApp.Middlewares;
 using ParkinApp.Validators;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,7 +26,6 @@ builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>(); //do zmiany
 builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
 
-
 builder.Services.AddMemoryCache();
 
 builder.Services.AddIdentityServices(builder.Configuration);
@@ -38,7 +35,6 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddControllers();
 
-    
 builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
@@ -49,6 +45,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
