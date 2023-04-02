@@ -6,11 +6,11 @@ namespace ParkinApp.Middlewares;
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
+    private readonly ILogger<ExceptionMiddleware> _logger; 
 
     private const string ExceptionParseErrorMessage = "Something went wrong while parsing the exception.";
-    
-    public ExceptionMiddleware(RequestDelegate next, ILogger logger)
+
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger) 
     {
         _logger = logger;
         _next = next;
