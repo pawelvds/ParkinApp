@@ -35,4 +35,8 @@
       <ProjectReference Include="..\ParkinApp.Persistence\ParkinApp.Persistence.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Exceptions" />
+    </ItemGroup>
+
 </Project>

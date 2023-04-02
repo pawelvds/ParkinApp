@@ -1,13 +1,14 @@
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Extensions;
-using ParkinApp.Persistence.Data;
 using ParkinApp.Persistence.Repositories;
 using ParkinApp.Services;
 using FluentValidation.AspNetCore;
+using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
+using ParkinApp.DTOs;
+using ParkinApp.Validators;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,12 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
-builder.Services.AddTransient<IValidator<ParkingSpot>, ParkingSpotValidator>();
+builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
+builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
+builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>(); //do zmiany
+builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
+
+
 builder.Services.AddMemoryCache();
 
 builder.Services.AddIdentityServices(builder.Configuration);
@@ -30,10 +36,10 @@ builder.Services.AddIdentityServices(builder.Configuration);
 // Use ApplicationServiceExtensions to register DbContext and other services.
 builder.Services.AddApplicationServices(builder.Configuration);
 
-builder.Services.AddControllers().AddFluentValidation(fv =>
-{
-    fv.RegisterValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
-});
+builder.Services.AddControllers();
+
+    
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 

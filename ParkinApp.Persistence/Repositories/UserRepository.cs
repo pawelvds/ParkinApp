@@ -16,12 +16,13 @@ namespace ParkinApp.Persistence.Repositories
 
         public async Task<bool> UserExists(string username)
         {
-            return await _context.Users.AnyAsync(u => u.Login == username);
+            return await _context.Users.AnyAsync(u => u.Login.Equals(username));
         }
 
-        public async Task<User?> GetUserByUsername(string username)
+        public async Task<User> GetUserByUsername(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Login == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Login.Equals(username)) ??
+                   throw new Exception("bla bla bla");
         }
         
         public async Task UpdateUserAsync(User user)

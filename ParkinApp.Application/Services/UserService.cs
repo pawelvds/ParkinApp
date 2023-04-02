@@ -13,16 +13,11 @@ namespace ParkinApp.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
-        private readonly IValidator<RegisterDto> _registerValidator;
-        private readonly IValidator<LoginDto> _loginValidator;
 
-        public UserService(IUserRepository userRepository, ITokenService tokenService,
-            IValidator<RegisterDto> registerValidator, IValidator<LoginDto> loginValidator)
+        public UserService(IUserRepository userRepository, ITokenService tokenService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
-            _registerValidator = registerValidator;
-            _loginValidator = loginValidator;
         }
 
         public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto)
@@ -52,17 +47,7 @@ namespace ParkinApp.Services
 
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
         {
-            var validationResult = await _loginValidator.ValidateAsync(loginDto);
-            if (!validationResult.IsValid)
-            {
-                return Result<UserDto>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
-            }
-
-
             var user = await _userRepository.GetUserByUsername(loginDto.Username);
-
-            if (user == null)
-                return Result<UserDto>.Failure(new List<string> { "Invalid username" });
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
 

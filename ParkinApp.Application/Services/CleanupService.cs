@@ -26,7 +26,9 @@ public class CleanupService : IHostedService, IDisposable
         var context = scope.ServiceProvider.GetRequiredService<ParkingDbContext>();
 
         var utcNow = DateTime.UtcNow;
-        var parkingSpots = context.ParkingSpots.Include(ps => ps.User).Where(ps => ps.IsReserved && ps.ReservationEndTime != null && ps.SpotTimeZoneId != null).ToList();
+        var parkingSpots = context.ParkingSpots.Include(ps => ps.User)
+                                                              .Where(ps => ps.IsReserved && ps.ReservationEndTime != null && ps.SpotTimeZoneId != null)
+                                                              .ToList();
 
         foreach (var spot in parkingSpots)
         {
@@ -45,7 +47,7 @@ public class CleanupService : IHostedService, IDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing parking spot cleanup: {ex.Message}");
+                Console.WriteLine($"Error processing parking spot cleanup: {ex.Message}"); //throw new exception
             }
         }
 

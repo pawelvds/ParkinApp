@@ -17,9 +17,9 @@ namespace ParkinApp.Persistence.Repositories
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(int id)
         {
-            return await _context.Set<T>().FindAsync(id);
+            return await _context.Set<T>().FindAsync(id) ?? throw new Exception("XYZ");
         }
 
         public async Task AddAsync(T entity)
@@ -30,21 +30,8 @@ namespace ParkinApp.Persistence.Repositories
 
         public async Task UpdateAsync(T entity)
         {
-            var entityType = _context.Model.FindEntityType(typeof(T));
-            var primaryKey = entityType.FindPrimaryKey();
-            var keyValues = primaryKey.Properties.Select(p => p.PropertyInfo.GetValue(entity)).ToArray();
-            var trackedEntity = await _context.Set<T>().FindAsync(keyValues);
-
-            if (trackedEntity != null)
-            {
-                _context.Entry(trackedEntity).CurrentValues.SetValues(entity);
-            }
-            else
-            {
-                _context.Set<T>().Update(entity);
-            }
-
-            await _context.SaveChangesAsync();
+            _context.Set<T>().Update(entity);
+             await _context.SaveChangesAsync();
         }
         
         public async Task DeleteAsync(T entity)

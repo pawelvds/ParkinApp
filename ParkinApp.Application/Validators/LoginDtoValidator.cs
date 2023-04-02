@@ -11,7 +11,7 @@ public class LoginDtoValidator : AbstractValidator<LoginDto>
         RuleFor(x => x.Password).NotEmpty();
         RuleFor(x => x.UserTimeZoneId)
             .NotEmpty().WithMessage("Time zone is required.")
-            .Must(IsValidTimeZoneId).WithMessage("Invalid time zone.");
+            .Must(IsValidTimeZoneId).WithMessage("Invalid time zone."); // date time offset now!!!!
     }
     
     private bool IsValidTimeZoneId(string timeZoneId)
@@ -21,7 +21,7 @@ public class LoginDtoValidator : AbstractValidator<LoginDto>
             TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             return true;
         }
-        catch (TimeZoneNotFoundException)
+        catch (TimeZoneNotFoundException) // do przeróbki, wyjątek, nie bedzie stref czasowych
         {
             return false;
         }
