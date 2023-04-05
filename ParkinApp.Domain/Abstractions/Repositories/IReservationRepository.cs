@@ -4,6 +4,6 @@ namespace ParkinApp.Domain.Abstractions.Repositories
 {
     public interface IReservationRepository : IGenericRepository<Reservation>
     {
-        Task<Reservation?> GetActiveUserReservationAsync(int userId);
+        Task<Reservation?>GetActiveReservationByUserIdAsync(int userId);
     }
 }

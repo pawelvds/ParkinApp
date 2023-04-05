@@ -23,12 +23,5 @@ namespace ParkinApp.Persistence.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Login.Equals(username));
         }
-        
-        public async Task UpdateUserAsync(User user)
-        {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-        }
-
     }
 }

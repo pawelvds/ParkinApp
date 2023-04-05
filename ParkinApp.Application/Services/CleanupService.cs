@@ -28,7 +28,7 @@ namespace ParkinApp.Services
             var utcNow = DateTimeOffset.UtcNow;
             var reservations = context.Reservations.Include(r => r.ParkingSpot)
                 .Include(r => r.User)
-                .Where(r => r.ReservationEndTime < utcNow) // Poprawiony warunek
+                .Where(r => r.ReservationEndTime < utcNow) 
                 .ToList();
 
             foreach (var reservation in reservations)

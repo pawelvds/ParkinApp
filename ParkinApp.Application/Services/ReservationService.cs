@@ -73,7 +73,7 @@ namespace ParkinApp.Services
                 return Result<string>.Failure("User not found.");
             }
             
-            var reservation = await _reservationRepository.GetActiveUserReservationAsync(user.Id);
+            var reservation = await _reservationRepository.GetActiveReservationByUserIdAsync(user.Id);
             if (reservation == null)
             {
                 return Result<string>.Failure("User doesn't have any active reservation.");
@@ -83,8 +83,6 @@ namespace ParkinApp.Services
 
             return Result<string>.Success("Reservation cancelled.");
         }
-
-
 
         private async Task<ParkingSpot?> GetParkingSpotByIdAsync(int parkingSpotId)
         {
