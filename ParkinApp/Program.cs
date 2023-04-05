@@ -27,6 +27,7 @@ builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>(); //do zmiany
 builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 
 builder.Services.AddMemoryCache();

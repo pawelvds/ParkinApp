@@ -1,10 +1,12 @@
 using FluentValidation;
 using ParkinApp.Domain.Entities;
 
+namespace ParkinApp.Validators;
+
 public class ParkingSpotValidator : AbstractValidator<ParkingSpot>
 {
     public ParkingSpotValidator()
     {
-        RuleFor(x => x.SpotTimeZoneId).NotEmpty().WithMessage("SpotTimeZoneId is required.");
+        RuleFor(x => x.SpotTimeZone).NotEmpty().WithMessage("SpotTimeZone is required.");
     }
 }

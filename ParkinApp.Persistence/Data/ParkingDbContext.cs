@@ -2,20 +2,23 @@ using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Configurations;
 
-namespace ParkinApp.Persistence.Data;
-
-public class ParkingDbContext : DbContext
+namespace ParkinApp.Persistence.Data
 {
-    public ParkingDbContext(DbContextOptions<ParkingDbContext> options) : base(options)
+    public class ParkingDbContext : DbContext
     {
-    }
-    
-    public DbSet<ParkingSpot> ParkingSpots { get; set; }
-    public DbSet<User> Users { get; set; }
+        public ParkingDbContext(DbContextOptions<ParkingDbContext> options) : base(options)
+        {
+        }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new ParkingSpotConfiguration());
+        public DbSet<ParkingSpot> ParkingSpots { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new ParkingSpotConfiguration());
+            modelBuilder.ApplyConfiguration(new ReservationConfiguration());
+        }
     }
 }

@@ -22,7 +22,7 @@ public class ParkingSpotService : IParkingSpotService
         var parkingSpots = await _parkingSpotRepository.GetAllAsync();
         return parkingSpots.Select(ps => new ParkingSpotDto(
             ps.Id,
-            ps.IsReserved
+            ps.SpotTimeZone
         )).ToList();
     }
 }

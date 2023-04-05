@@ -19,10 +19,9 @@ namespace ParkinApp.Persistence.Repositories
             return await _context.Users.AnyAsync(u => u.Login.Equals(username));
         }
 
-        public async Task<User> GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Login.Equals(username)) ??
-                   throw new Exception("bla bla bla");
+            return await _context.Users.FirstOrDefaultAsync(u => u.Login.Equals(username));
         }
         
         public async Task UpdateUserAsync(User user)
@@ -30,5 +29,6 @@ namespace ParkinApp.Persistence.Repositories
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
+
     }
 }

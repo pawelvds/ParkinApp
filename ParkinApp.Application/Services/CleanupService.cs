@@ -2,79 +2,77 @@ using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Data;
 
-namespace ParkinApp.Services;
-
-public class CleanupService : IHostedService, IDisposable
+namespace ParkinApp.Services
 {
-    private Timer? _timer;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public CleanupService(IServiceScopeFactory scopeFactory)
+    public class CleanupService : IHostedService, IDisposable
     {
-        _scopeFactory = scopeFactory;
-    }
+        private Timer? _timer;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        _timer = new Timer(Cleanup, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
-        return Task.CompletedTask;
-    }
-
-    private void Cleanup(object? state)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ParkingDbContext>();
-
-        var utcNow = DateTime.UtcNow;
-        var parkingSpots = context.ParkingSpots.Include(ps => ps.User)
-                                                              .Where(ps => ps.IsReserved && ps.ReservationEndTime != null && ps.SpotTimeZoneId != null)
-                                                              .ToList();
-
-        foreach (var spot in parkingSpots)
+        public CleanupService(IServiceScopeFactory scopeFactory)
         {
-            try
-            {
-                if (spot.ReservationEndTime.HasValue && !string.IsNullOrEmpty(spot.SpotTimeZoneId))
-                {
-                    var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(spot.SpotTimeZoneId);
-                    var spotEndTimeInLocal = TimeZoneInfo.ConvertTimeToUtc(spot.ReservationEndTime.Value, spotTimeZone);
+            _scopeFactory = scopeFactory;
+        }
 
-                    if (spotEndTimeInLocal <= utcNow)
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            _timer = new Timer(Cleanup, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+            return Task.CompletedTask;
+        }
+
+        private void Cleanup(object? state)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ParkingDbContext>();
+
+            var utcNow = DateTimeOffset.UtcNow;
+            var reservations = context.Reservations.Include(r => r.ParkingSpot)
+                .Include(r => r.User)
+                .Where(r => r.ReservationEndTime < utcNow) // Poprawiony warunek
+                .ToList();
+
+            foreach (var reservation in reservations)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(reservation.ParkingSpot?.SpotTimeZone))
                     {
-                        CleanupReservation(spot);
+                        var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(reservation.ParkingSpot.SpotTimeZone);
+                        var spotEndTimeInLocal = TimeZoneInfo.ConvertTimeToUtc(reservation.ReservationEndTime, spotTimeZone);
+
+                        if (spotEndTimeInLocal <= utcNow)
+                        {
+                            CleanupReservation(context, reservation);
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing parking spot cleanup: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error processing parking spot cleanup: {ex.Message}"); //throw new exception
-            }
+
+            context.SaveChanges();
         }
 
-        context.SaveChanges();
-    }
 
-    private void CleanupReservation(ParkingSpot spot)
-    {
-        spot.IsReserved = false;
-        spot.UserId = null;
-        spot.ReservationTime = null;
-        spot.ReservationEndTime = null;
-
-        if (spot.User != null)
+        private void CleanupReservation(ParkingDbContext context, Reservation reservation)
         {
-            spot.User.ReservedSpotId = null;
+            if (reservation.User != null && reservation.ParkingSpot != null)
+            {
+                context.Reservations.Remove(reservation);
+            }
         }
-    }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        _timer?.Change(Timeout.Infinite, 0);
-        return Task.CompletedTask;
-    }
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _timer?.Change(Timeout.Infinite, 0);
+            return Task.CompletedTask;
+        }
 
-    public void Dispose()
-    {
-        _timer?.Dispose();
+        public void Dispose()
+        {
+            _timer?.Dispose();
+        }
     }
 }
