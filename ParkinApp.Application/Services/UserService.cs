@@ -32,7 +32,7 @@ namespace ParkinApp.Services
                 Login = registerDto.Username,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
                 PasswordSalt = hmac.Key,
-                UserTimeZoneId = "UTC"
+                UserTimeZone = "UTC"
             };
 
             await _userRepository.AddAsync(user);
@@ -40,7 +40,7 @@ namespace ParkinApp.Services
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
                 _tokenService.CreateToken(user),
-                user.UserTimeZoneId
+                user.UserTimeZone
             ));
         }
 
@@ -60,13 +60,13 @@ namespace ParkinApp.Services
             }
 
             // Update the user's time zone during login
-            user.UserTimeZoneId = loginDto.UserTimeZoneId;
+            user.UserTimeZone = loginDto.UserTimeZoneId;
             await _userRepository.UpdateAsync(user);
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
                 _tokenService.CreateToken(user),
-                user.UserTimeZoneId
+                user.UserTimeZone
             ));
         }
     }

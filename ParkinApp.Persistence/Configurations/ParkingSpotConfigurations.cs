@@ -1,33 +1,34 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ParkinApp.Domain.Entities;
+using System.Linq;
 
-namespace ParkinApp.Persistence.Configurations;
-
+namespace ParkinApp.Persistence.Configurations
+{
     public class ParkingSpotConfiguration : IEntityTypeConfiguration<ParkingSpot>
     {
         private const string DefaultTimeZone = "Europe/Warsaw";
-        
+
         public void Configure(EntityTypeBuilder<ParkingSpot> builder)
         {
             builder.HasKey(ps => ps.Id);
 
-            builder.HasOne(ps => ps.User)
-                .WithOne(u => u.ReservedSpot)
-                .HasForeignKey<ParkingSpot>(ps => ps.UserId);
+            builder.Property(ps => ps.SpotTimeZone).IsRequired();
 
+            SeedData(builder);
+        }
+
+        private void SeedData(EntityTypeBuilder<ParkingSpot> builder)
+        {
             var defaultTimeZone = DefaultTimeZone;
 
             builder.HasData(
-                Enumerable.Range(1, 10)
+                Enumerable.Range(1, 20)
                     .Select(i => new ParkingSpot
                     {
                         Id = i,
-                        IsReserved = false,
-                        ReservationTime = null,
-                        UserId = null,
-                        SpotTimeZoneId = defaultTimeZone,
-                        UserTimeZoneId = defaultTimeZone 
+                        SpotTimeZone = defaultTimeZone
                     }));
         }
     }
+}

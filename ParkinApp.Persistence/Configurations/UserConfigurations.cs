@@ -11,10 +11,9 @@ namespace ParkinApp.Persistence.Configurations
             builder.HasKey(u => u.Id);
             builder.Property(u => u.Login).IsRequired().HasMaxLength(30);
             builder.HasIndex(u => u.Login).IsUnique();
-
-            builder.HasOne(u => u.ReservedSpot)
-                .WithOne(ps => ps.User)
-                .HasForeignKey<User>(u => u.ReservedSpotId);
+            builder.Property(u => u.PasswordHash).IsRequired();
+            builder.Property(u => u.PasswordSalt).IsRequired();
+            builder.Property(u => u.UserTimeZone).IsRequired();
         }
     }
 }

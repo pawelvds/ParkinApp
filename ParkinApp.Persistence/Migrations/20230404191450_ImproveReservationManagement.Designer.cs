@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParkinApp.Persistence.Data;
 
@@ -11,9 +12,11 @@ using ParkinApp.Persistence.Data;
 namespace ParkinApp.Persistence.Migrations
 {
     [DbContext(typeof(ParkingDbContext))]
-    partial class ParkingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230404191450_ImproveReservationManagement")]
+    partial class ImproveReservationManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,108 +40,6 @@ namespace ParkinApp.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ParkingSpots");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            SpotTimeZone = "Europe/Warsaw"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            SpotTimeZone = "Europe/Warsaw"
-                        });
                 });
 
             modelBuilder.Entity("ParkinApp.Domain.Entities.Reservation", b =>
