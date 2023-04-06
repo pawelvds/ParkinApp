@@ -1,3 +1,2 @@
-﻿const API_ENDPOINT = 'http://localhost:8000/api/';
-
+const API_ENDPOINT = "http://localhost:5169/api";
 export default API_ENDPOINT;

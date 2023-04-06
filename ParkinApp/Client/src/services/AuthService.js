@@ -1,9 +1,9 @@
-﻿import axios from "axios";
+import axios from "axios";
 import API_ENDPOINT from "../config";
 
 const register = (username, password) => {
     return axios
-        .post(API_ENDPOINT + "/register", {
+        .post(API_ENDPOINT + "/User/register", { 
             username,
             password,
         })
@@ -16,11 +16,12 @@ const register = (username, password) => {
         });
 };
 
-const login = (username, password) => {
+const login = (username, password, userTimeZoneId) => {
     return axios
-        .post(API_ENDPOINT + "/login", {
+        .post(API_ENDPOINT + "/User/login", { 
             username,
             password,
+            userTimeZoneId,
         })
         .then((response) => {
             if (response.data.accessToken) {

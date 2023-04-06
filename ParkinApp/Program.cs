@@ -38,6 +38,18 @@ builder.Services.AddControllers();
 
 builder.Services.AddFluentValidationAutoValidation();
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        corsPolicyBuilder => corsPolicyBuilder
+            .WithOrigins("http://localhost:3000") // React app address
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,6 +65,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowReactApp");
+
+app.UseRouting();
 
 app.MapControllers();
 

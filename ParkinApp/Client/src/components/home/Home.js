@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from "react";
-import parkingSpotService from "../../services/ParkingSpotService";
+import React, { useState, useEffect } from "react";
+import ParkingSpotService from "../../services/ParkingSpotService"; 
 
 const Home = () => {
     const [parkingSpots, setParkingSpots] = useState([]);
 
     useEffect(() => {
-        parkingSpotService.getParkingSpots()
+        ParkingSpotService.getParkingSpots() 
             .then(response => setParkingSpots(response.data))
             .catch(error => console.error(error));
     }, []);
@@ -15,10 +15,11 @@ const Home = () => {
             <h2>Parking Spots:</h2>
             <ul>
                 {parkingSpots.map(parkingSpot => (
-                    <li key={parkingSpot.id}>{parkingSpot.name}</li>
+                    <li key={parkingSpot.id}>Spot ID: {parkingSpot.id} - Time Zone: {parkingSpot.spotTimeZone}</li>
                 ))}
             </ul>
         </div>
+
     );
 };
 
