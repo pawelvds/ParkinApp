@@ -28,6 +28,12 @@ namespace ParkinApp.Services
         {
             var user = await _userRepository.GetUserByUsername(userId);
 
+            var userActiveReservation = await _reservationRepository.GetActiveReservationByUserIdAsync(user.Id);
+            if (userActiveReservation != null)
+            {
+                return Result<ReservationResultDto>.Failure("User already has an active reservation.");
+            }
+
             var parkingSpot = await GetParkingSpotByIdAsync(reservationDto.ParkingSpotId);
             if (parkingSpot == null)
             {
@@ -66,8 +72,6 @@ namespace ParkinApp.Services
 
             return Result<ReservationResultDto>.Success(reservationResultDto);
         }
-
-
 
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {
