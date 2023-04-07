@@ -31,16 +31,14 @@ namespace ParkinApp.Services
             {
                 Login = registerDto.Username,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key,
-                UserTimeZone = "UTC"
+                PasswordSalt = hmac.Key
             };
 
             await _userRepository.AddAsync(user);
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
-                _tokenService.CreateToken(user),
-                user.UserTimeZone
+                _tokenService.CreateToken(user)
             ));
         }
 
@@ -59,14 +57,9 @@ namespace ParkinApp.Services
                     return Result<UserDto>.Failure(new List<string> { "Invalid password" });
             }
 
-            // Update the user's time zone during login
-            user.UserTimeZone = loginDto.UserTimeZoneId;
-            await _userRepository.UpdateAsync(user);
-
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
-                _tokenService.CreateToken(user),
-                user.UserTimeZone
+                _tokenService.CreateToken(user)
             ));
         }
     }

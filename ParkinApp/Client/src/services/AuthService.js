@@ -16,12 +16,11 @@ const register = (username, password) => {
         });
 };
 
-const login = (username, password, userTimeZoneId) => {
+const login = (username, password) => {
     return axios
         .post(API_ENDPOINT + "/User/login", { 
             username,
             password,
-            userTimeZoneId,
         })
         .then((response) => {
             if (response.data.accessToken) {

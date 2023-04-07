@@ -42,12 +42,6 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                <input
-                    type="text"
-                    placeholder="time zone"
-                    value={timezone}
-                    onChange={(e) => setTimeZone(e.target.value)}
-                />
                 <button type="submit">Log in</button>
             </form>
         </div>

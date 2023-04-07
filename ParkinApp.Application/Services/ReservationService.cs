@@ -34,20 +34,23 @@ namespace ParkinApp.Services
                 return Result<ReservationResultDto>.Failure("Parking spot not found.");
             }
 
-            var activeReservation = parkingSpot.Reservations.FirstOrDefault(r => r.ReservationEndTime > DateTime.UtcNow);
+            var activeReservation = parkingSpot.Reservations.FirstOrDefault(r => r.ReservationEndTime > DateTimeOffset.UtcNow);
             if (activeReservation != null)
             {
                 return Result<ReservationResultDto>.Failure("Parking spot is already reserved.");
             }
 
-            var reservationEndTime = DateTime.UtcNow.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Europe/Warsaw");
+            var localDateTime = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timeZoneInfo);
+            var reservationEndTime = localDateTime.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            var reservationEndTimeUtc = TimeZoneInfo.ConvertTime(reservationEndTime, timeZoneInfo);
 
             var reservation = new Reservation
             {
                 UserId = user.Id,
                 ParkingSpotId = parkingSpot.Id,
-                CreatedReservationTime = DateTime.UtcNow,
-                ReservationEndTime = reservationEndTime
+                CreatedReservationTime = DateTimeOffset.UtcNow,
+                ReservationEndTime = reservationEndTimeUtc
             };
 
             await _reservationRepository.AddAsync(reservation);
@@ -63,6 +66,8 @@ namespace ParkinApp.Services
 
             return Result<ReservationResultDto>.Success(reservationResultDto);
         }
+
+
 
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {
