@@ -5,14 +5,14 @@ import AuthService from "../../services/AuthService";
 const Login = () => {
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
-    const [timezone, setTimeZone] = useState("");
+
 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            await AuthService.login(userName, password, timezone).then(
+            await AuthService.login(userName, password).then(
                 () => {
                     navigate("/home");
                     window.location.reload();
