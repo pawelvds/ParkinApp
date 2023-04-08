@@ -4,12 +4,12 @@ using ParkinApp.Persistence.Data;
 
 namespace ParkinApp.Services
 {
-    public class CleanupService : IHostedService, IDisposable
+    public class CleanupExpiredReservations : IHostedService, IDisposable
     {
         private Timer? _timer;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public CleanupService(IServiceScopeFactory scopeFactory)
+        public CleanupExpiredReservations(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
         }
@@ -38,9 +38,9 @@ namespace ParkinApp.Services
                     if (!string.IsNullOrEmpty(reservation.ParkingSpot?.SpotTimeZone))
                     {
                         var spotTimeZone = TimeZoneInfo.FindSystemTimeZoneById(reservation.ParkingSpot.SpotTimeZone);
-                        var spotEndTimeInLocal = TimeZoneInfo.ConvertTimeToUtc(reservation.ReservationEndTime, spotTimeZone);
+                        var spotEndTimeInLocal = TimeZoneInfo.ConvertTime(reservation.ReservationEndTime, spotTimeZone);
 
-                        if (spotEndTimeInLocal <= utcNow)
+                        if (spotEndTimeInLocal.UtcDateTime <= utcNow)
                         {
                             CleanupReservation(context, reservation);
                         }

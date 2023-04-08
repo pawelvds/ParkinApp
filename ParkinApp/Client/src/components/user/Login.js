@@ -5,14 +5,14 @@ import AuthService from "../../services/AuthService";
 const Login = () => {
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
-    const [timezone, setTimeZone] = useState("");
+
 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            await AuthService.login(userName, password, timezone).then(
+            await AuthService.login(userName, password).then(
                 () => {
                     navigate("/home");
                     window.location.reload();
@@ -41,12 +41,6 @@ const Login = () => {
                     placeholder="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="time zone"
-                    value={timezone}
-                    onChange={(e) => setTimeZone(e.target.value)}
                 />
                 <button type="submit">Log in</button>
             </form>

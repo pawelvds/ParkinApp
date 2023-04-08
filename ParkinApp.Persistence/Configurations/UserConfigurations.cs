@@ -13,7 +13,6 @@ namespace ParkinApp.Persistence.Configurations
             builder.HasIndex(u => u.Login).IsUnique();
             builder.Property(u => u.PasswordHash).IsRequired();
             builder.Property(u => u.PasswordSalt).IsRequired();
-            builder.Property(u => u.UserTimeZone).IsRequired();
         }
     }
 }

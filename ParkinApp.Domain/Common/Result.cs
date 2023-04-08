@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using FluentValidation.Results;
 
 namespace ParkinApp.Domain.Common

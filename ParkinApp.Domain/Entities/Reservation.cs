@@ -7,6 +7,6 @@ public class Reservation
     public User? User { get; set; }
     public int ParkingSpotId { get; set; }
     public ParkingSpot? ParkingSpot { get; set; }
-    public DateTime ReservationEndTime { get; set; }
-    public DateTime CreatedReservationTime { get; set; }
+    public DateTimeOffset ReservationEndTime { get; set; }
+    public DateTimeOffset CreatedReservationTime { get; set; }
 }

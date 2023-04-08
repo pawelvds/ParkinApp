@@ -28,25 +28,32 @@ namespace ParkinApp.Services
         {
             var user = await _userRepository.GetUserByUsername(userId);
 
+            var userActiveReservation = await _reservationRepository.GetActiveReservationByUserIdAsync(user.Id);
+            if (userActiveReservation != null)
+            {
+                return Result<ReservationResultDto>.Failure("User already has an active reservation.");
+            }
+
             var parkingSpot = await GetParkingSpotByIdAsync(reservationDto.ParkingSpotId);
             if (parkingSpot == null)
             {
                 return Result<ReservationResultDto>.Failure("Parking spot not found.");
             }
 
-            var activeReservation = parkingSpot.Reservations.FirstOrDefault(r => r.ReservationEndTime > DateTime.UtcNow);
+            var activeReservation = parkingSpot.Reservations.FirstOrDefault(r => r.ReservationEndTime > DateTimeOffset.UtcNow);
             if (activeReservation != null)
             {
                 return Result<ReservationResultDto>.Failure("Parking spot is already reserved.");
             }
 
-            var reservationEndTime = DateTime.UtcNow.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            var utcNow = DateTimeOffset.UtcNow;
+            var reservationEndTime = new DateTimeOffset(utcNow.Date.AddDays(1).AddTicks(-1), TimeSpan.Zero);
 
             var reservation = new Reservation
             {
                 UserId = user.Id,
                 ParkingSpotId = parkingSpot.Id,
-                CreatedReservationTime = DateTime.UtcNow,
+                CreatedReservationTime = utcNow,
                 ReservationEndTime = reservationEndTime
             };
 
@@ -63,6 +70,7 @@ namespace ParkinApp.Services
 
             return Result<ReservationResultDto>.Success(reservationResultDto);
         }
+
 
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {

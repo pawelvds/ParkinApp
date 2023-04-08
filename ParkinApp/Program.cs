@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddSingleton<IHostedService, CleanupService>();
+builder.Services.AddSingleton<IHostedService, CleanupExpiredReservations>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
@@ -63,12 +63,12 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors("AllowReactApp");
-
-app.UseRouting();
 
 app.MapControllers();
 
