@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
+import { Container, Form, Button } from "react-bootstrap";
 
 const Register = () => {
     const [userName, setUserName] = useState("");
@@ -26,24 +27,34 @@ const Register = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleRegister}>
-                <h3>Sign up</h3>
-                <input
-                    type="text"
-                    placeholder="user name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Register</button>
-            </form>
-        </div>
+        <Container className="mt-5">
+            <h3>Sign up</h3>
+            <Form onSubmit={handleRegister}>
+                <Form.Group controlId="formBasicUserName">
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Enter username"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                    />
+                </Form.Group>
+
+                <Form.Group controlId="formBasicPassword">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                        type="password"
+                        placeholder="Enter password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </Form.Group>
+
+                <Button variant="primary" type="submit">
+                    Register
+                </Button>
+            </Form>
+        </Container>
     );
 };
 

@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from "react";
-import ParkingSpotService from "../../services/ParkingSpotService"; 
+import ParkingSpotService from "../../services/ParkingSpotService";
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 
 const Home = () => {
     const [parkingSpots, setParkingSpots] = useState([]);
 
     useEffect(() => {
-        ParkingSpotService.getParkingSpots() 
+        ParkingSpotService.getParkingSpots()
             .then(response => setParkingSpots(response.data))
             .catch(error => console.error(error));
     }, []);
 
     return (
-        <div>
+        <Container>
             <h2>Parking Spots:</h2>
-            <ul>
+            <Row>
                 {parkingSpots.map(parkingSpot => (
-                    <li key={parkingSpot.id}>Spot ID: {parkingSpot.id} - Time Zone: {parkingSpot.spotTimeZone}</li>
+                    <Col md={3} key={parkingSpot.id}>
+                        <Card>
+                            <Card.Body>
+                                <Card.Title>{parkingSpot.name}</Card.Title>
+                                <Card.Text>
+                                    Spot ID: {parkingSpot.id} <br />
+                                    Time Zone: {parkingSpot.spotTimeZone} <br />
+                                    Reserved by:
+                                </Card.Text>
+                                <Button variant="primary">Reserve</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
                 ))}
-            </ul>
-        </div>
-
+            </Row>
+        </Container>
     );
 };
 
