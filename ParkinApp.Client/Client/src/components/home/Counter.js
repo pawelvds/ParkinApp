@@ -6,7 +6,7 @@ const Counter = () => {
 
     return (
         <Container>
-            <h2>Liczba dostępnych miejsc parkingowych: {20}</h2>
+            <h2>: Number of available parking spots:{20}</h2>
         </Container>
     );
 };
