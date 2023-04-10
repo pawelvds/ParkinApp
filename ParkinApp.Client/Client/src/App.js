@@ -4,6 +4,7 @@ import AuthService from "./services/AuthService";
 import Login from "./components/user/Login";
 import Register from "./components/user/Register";
 import Home from "./components/home/Home";
+import Logout from "./components/user/Logout";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -17,8 +18,8 @@ function App() {
     }
   }, []);
 
-  const logOut = () => {
-    AuthService.logout();
+  const handleLogout = () => {
+    AuthService.logout().then(() => setCurrentUser(undefined));
   };
 
   return (
@@ -40,13 +41,12 @@ function App() {
               <span className="navbar-toggler-icon"></span>
             </button>
             <div className="collapse navbar-collapse" id="navbarNav">
-
               {currentUser ? (
                   <div className="navbar-nav ms-auto">
                     <li className="nav-item">
-                      <a href="/login" className="nav-link" onClick={logOut}>
+                      <button className="nav-link btn btn-link" onClick={handleLogout}>
                         Logout
-                      </a>
+                      </button>
                     </li>
                   </div>
               ) : (
@@ -70,9 +70,10 @@ function App() {
 
         <div className="container mt-3">
           <Routes>
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<Home currentUser={currentUser} />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
           </Routes>
         </div>
       </div>
