@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ParkinApp.Domain.Abstractions.Repositories;
@@ -9,14 +10,15 @@ using ParkinApp.Domain.Entities;
 public class TokenService : ITokenService
 {
     private readonly SymmetricSecurityKey _key;
-    private readonly IGenericRepository<User> _repo;
+    private readonly IUserRepository _userRepository;
 
-    public TokenService(IConfiguration config)
+    public TokenService(IConfiguration config, IUserRepository userRepository)
     {
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+        _userRepository = userRepository;
     }
 
-    public string CreateToken(User? user)
+    public string CreateToken(User user)
     {
         var claims = new List<Claim>
         {
@@ -36,5 +38,33 @@ public class TokenService : ITokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    public string CreateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+    }
+
+    public async Task StoreRefreshTokenAsync(User user, string refreshToken)
+    {
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(7);
+        await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task InvalidateTokenAsync(string refreshToken)
+    {
+        var user = await _userRepository.GetUserByRefreshToken(refreshToken);
+        if (user != null)
+        {
+            user.RefreshToken = string.Empty;
+            user.RefreshTokenExpiryDate = null;
+            await _userRepository.UpdateAsync(user);
+        }
     }
 }
