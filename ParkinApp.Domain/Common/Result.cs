@@ -7,6 +7,7 @@ namespace ParkinApp.Domain.Common
         public bool IsSuccessful { get; set; }
         public T Value { get; set; }
         public List<string> Errors { get; set; }
+        public bool IsFailure { get; set; }
 
         public static Result<T> Success(T value)
         {
@@ -31,5 +32,11 @@ namespace ParkinApp.Domain.Common
                 Errors = validationResultErrors.Select(e => e.ErrorMessage).ToList()
             };
         }
+        
+        public static Result<T> Success()
+        {
+            return new Result<T> { IsSuccessful = true };
+        }
+
     }
 }

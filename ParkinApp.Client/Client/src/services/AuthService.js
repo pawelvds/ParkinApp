@@ -32,7 +32,20 @@ const login = (username, password) => {
 };
 
 const logout = () => {
-    localStorage.removeItem("user");
+    const user = getCurrentUser();
+    if (user && user.refreshToken) {
+        return axios
+            .post(API_ENDPOINT + "/User/logout", { refreshToken: user.refreshToken })
+            .then(() => {
+                localStorage.removeItem("user");
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    } else {
+        localStorage.removeItem("user");
+        return Promise.resolve();
+    }
 };
 
 const getCurrentUser = () => {

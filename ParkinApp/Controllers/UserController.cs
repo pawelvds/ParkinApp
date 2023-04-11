@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using ParkinApp.DTOs;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.DTOs;
 
@@ -40,5 +39,32 @@ namespace ParkinApp.Controllers
 
             return Unauthorized(result.Errors);
         }
+        
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(LogoutDto logoutDto)
+        {
+            var result = await _userService.LogoutAsync(logoutDto.RefreshToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<UserDto>> RefreshToken(LogoutDto logoutDto)
+        {
+            var result = await _userService.RefreshTokenAsync(logoutDto.RefreshToken);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return result.Value;
+        }
+
     }
 }

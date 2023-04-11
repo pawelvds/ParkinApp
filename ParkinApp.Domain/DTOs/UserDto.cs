@@ -1,3 +1,4 @@
-namespace ParkinApp.Domain.DTOs;
-
-public record UserDto(string Username, string Token);
+namespace ParkinApp.Domain.DTOs
+{
+    public record UserDto(string Username, string AccessToken, string RefreshToken);
+}

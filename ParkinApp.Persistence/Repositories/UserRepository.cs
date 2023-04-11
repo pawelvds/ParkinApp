@@ -23,5 +23,11 @@ namespace ParkinApp.Persistence.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Login.Equals(username));
         }
+        public async Task<User?> GetUserByRefreshToken(string refreshToken)
+        {
+            return await _context.Set<User>()
+                .Where(u => u.RefreshToken == refreshToken)
+                .FirstOrDefaultAsync();
+        }
     }
 }
