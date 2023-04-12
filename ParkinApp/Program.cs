@@ -23,7 +23,7 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
-builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>(); //do zmiany
+builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>();
 builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
@@ -33,8 +33,6 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 // Use ApplicationServiceExtensions to register DbContext and other services.
 builder.Services.AddApplicationServices(builder.Configuration);
-
-builder.Services.AddControllers();
 
 builder.Services.AddFluentValidationAutoValidation();
 

@@ -7,6 +7,8 @@ using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Entities;
 
+namespace ParkinApp.Services;
+
 public class TokenService : ITokenService
 {
     private readonly SymmetricSecurityKey _key;
@@ -14,7 +16,7 @@ public class TokenService : ITokenService
 
     public TokenService(IConfiguration config, IUserRepository userRepository)
     {
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? throw new InvalidOperationException()));
         _userRepository = userRepository;
     }
 
@@ -30,7 +32,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = creds
         };
 
@@ -53,7 +55,7 @@ public class TokenService : ITokenService
     public async Task StoreRefreshTokenAsync(User user, string refreshToken)
     {
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryDate = DateTime.UtcNow.AddHours(1);
         await _userRepository.UpdateAsync(user);
     }
 

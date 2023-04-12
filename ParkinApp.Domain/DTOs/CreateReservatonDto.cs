@@ -1,3 +1,2 @@
 namespace ParkinApp.Domain.DTOs;
-
-public record CreateReservationDto(int ParkingSpotId);
+  public record CreateReservationDto(int ParkingSpotId);

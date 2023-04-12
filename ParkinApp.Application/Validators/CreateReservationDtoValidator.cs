@@ -1,14 +1,15 @@
 using FluentValidation;
 using ParkinApp.Domain.DTOs;
 
-namespace ParkinApp.Validators;
-
-public class CreateReservationDtoValidator : AbstractValidator<CreateReservationDto>
+namespace ParkinApp.Validators
 {
-    public CreateReservationDtoValidator()
+    public class CreateReservationDtoValidator : AbstractValidator<CreateReservationDto>
     {
-        RuleFor(dto => dto.ParkingSpotId)
-            .GreaterThan(0)
-            .WithMessage("Invalid parking spot ID.");
+        public CreateReservationDtoValidator()
+        {
+            RuleFor(dto => dto.ParkingSpotId)
+                .GreaterThan(0)
+                .WithMessage("Invalid parking spot ID.");
+        }
     }
 }

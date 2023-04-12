@@ -4,6 +4,7 @@ using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
+using System;
 
 namespace ParkinApp.Services
 {
@@ -70,8 +71,7 @@ namespace ParkinApp.Services
 
             return Result<ReservationResultDto>.Success(reservationResultDto);
         }
-
-
+        
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {
             var user = await _userRepository.GetUserByUsername(userId);
@@ -80,7 +80,7 @@ namespace ParkinApp.Services
             {
                 return Result<string>.Failure("User not found.");
             }
-            
+    
             var reservation = await _reservationRepository.GetActiveReservationByUserIdAsync(user.Id);
             if (reservation == null)
             {
@@ -88,8 +88,17 @@ namespace ParkinApp.Services
             }
 
             await _reservationRepository.DeleteAsync(reservation);
+    
+            // Refresh cache for the parking spot after cancelling the reservation
+            await RefreshParkingSpotCacheAsync(reservation.ParkingSpotId);
 
             return Result<string>.Success("Reservation cancelled.");
+        }
+
+        private async Task RefreshParkingSpotCacheAsync(int parkingSpotId)
+        {
+            var parkingSpot = await _parkingSpotRepository.GetParkingSpotByIdAsync(parkingSpotId);
+            UpdateParkingSpotCache(parkingSpot);
         }
 
         private async Task<ParkingSpot?> GetParkingSpotByIdAsync(int parkingSpotId)
@@ -113,5 +122,6 @@ namespace ParkinApp.Services
             return $"{ParkingSpotCacheKeyPrefix}{parkingSpotId}";
         }
     }
+
 }
 

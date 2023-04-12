@@ -1,9 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.DTOs;
-using ParkinApp.DTOs;
 
 namespace ParkinApp.Controllers
 {
@@ -39,7 +38,6 @@ namespace ParkinApp.Controllers
             return Unauthorized();
         }
 
-
         [HttpDelete("cancel")]
         public async Task<IActionResult> CancelReservation()
         {
@@ -51,7 +49,7 @@ namespace ParkinApp.Controllers
                 return Ok(result.Value);
             }
 
-            return Unauthorized(result.Errors);
+            return BadRequest(result.Errors);
         }
     }
 }

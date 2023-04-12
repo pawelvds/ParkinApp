@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Persistence.Data;
+using ParkinApp.Services;
 
 namespace ParkinApp.Extensions;
 
