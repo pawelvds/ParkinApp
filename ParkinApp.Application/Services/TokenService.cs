@@ -66,7 +66,7 @@ public class TokenService : ITokenService
         if (user != null)
         {
             user.RefreshToken = string.Empty;
-            user.RefreshTokenExpiryDate = null;
+            user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
             await _userRepository.UpdateAsync(user);
         }
     }

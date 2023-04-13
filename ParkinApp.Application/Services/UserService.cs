@@ -84,7 +84,7 @@ namespace ParkinApp.Services
             }
 
             user.RefreshToken = string.Empty;
-            user.RefreshTokenExpiryDate = null;
+            user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
             await _userRepository.UpdateAsync(user);
 
             return Result<UserDto>.Success();
@@ -94,7 +94,7 @@ namespace ParkinApp.Services
         {
             var user = await _userRepository.GetUserByRefreshToken(refreshToken);
 
-            if (user == null || user.RefreshTokenExpiryDate < DateTime.UtcNow)
+            if (user == null || user.RefreshTokenExpiryDate < DateTimeOffset.Now)
             {
                 return Result<UserDto>.Failure(new List<string> { "Invalid or expired refresh token" });
             }

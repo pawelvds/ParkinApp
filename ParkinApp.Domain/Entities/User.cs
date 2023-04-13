@@ -7,7 +7,7 @@ namespace ParkinApp.Domain.Entities
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
         public string RefreshToken { get; set; }
-        public DateTimeOffset? RefreshTokenExpiryDate { get; set; }
+        public DateTimeOffset RefreshTokenExpiryDate { get; set; }
         public ICollection<Reservation> Reservations { get; set; }
     }
 }
