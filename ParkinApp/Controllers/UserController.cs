@@ -54,7 +54,7 @@ namespace ParkinApp.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<UserDto>> RefreshToken(LogoutDto logoutDto)
+        public async Task<IActionResult> RefreshToken(LogoutDto logoutDto)
         {
             var result = await _userService.RefreshTokenAsync(logoutDto.RefreshToken);
 
@@ -63,8 +63,14 @@ namespace ParkinApp.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return result.Value;
+            var userDto = result.Value;
+            return Ok(new
+            {
+                accessToken = userDto.AccessToken,
+                refreshToken = userDto.RefreshToken
+            });
         }
+
 
     }
 }

@@ -5,7 +5,6 @@ import Login from "./components/user/Login";
 import Register from "./components/user/Register";
 import Home from "./components/home/Home";
 import Logout from "./components/user/Logout";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);

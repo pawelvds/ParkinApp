@@ -55,9 +55,10 @@ public class TokenService : ITokenService
     public async Task StoreRefreshTokenAsync(User user, string refreshToken)
     {
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryDate = DateTime.UtcNow.AddHours(1);
+        user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddHours(1);
         await _userRepository.UpdateAsync(user);
     }
+
 
     public async Task InvalidateTokenAsync(string refreshToken)
     {
