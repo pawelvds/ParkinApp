@@ -20,18 +20,21 @@ const isRefreshTokenExpired = (token) => {
     }
 };
 
-const refreshAccessToken = (refreshToken) => {
-    return axios
-        .post(API_ENDPOINT + "/User/refresh-token", { refreshToken })
-        .then((response) => {
-            if (response.data.accessToken) {
-                const user = getCurrentUser();
-                user.accessToken = response.data.accessToken;
-                localStorage.setItem("user", JSON.stringify(user));
-            }
-
+const refreshAccessToken = async (refreshToken) => {
+    try {
+        const response = await axios.post(API_ENDPOINT + "/User/refresh-token", { refreshToken });
+        if (response.data.accessToken) {
+            const user = getCurrentUser();
+            user.accessToken = response.data.accessToken;
+            localStorage.setItem("user", JSON.stringify(user));
             return response.data;
-        });
+        }
+    } catch (error) {
+        console.error("Error refreshing access token: ", error);
+        logout();
+        // Redirect to the login page instead of reloading the current page
+        window.location.href = "/login";
+    }
 };
 
 const scheduleRefresh = (user) => {
@@ -61,6 +64,7 @@ axios.interceptors.request.use(
         if (user && user.accessToken && isTokenExpired(user.accessToken)) {
             if (isRefreshTokenExpired(user.refreshToken)) {
                 await logout();
+                window.location.reload();
             } else {
                 try {
                     const { refreshToken } = user;
