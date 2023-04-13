@@ -70,7 +70,5 @@ namespace ParkinApp.Controllers
                 refreshToken = userDto.RefreshToken
             });
         }
-
-
     }
 }

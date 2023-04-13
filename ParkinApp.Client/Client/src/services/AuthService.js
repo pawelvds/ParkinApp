@@ -11,6 +11,15 @@ const isTokenExpired = (token) => {
     }
 };
 
+const isRefreshTokenExpired = (token) => {
+    try {
+        const decodedToken = jwt_decode(token);
+        return decodedToken.exp < Date.now() / 1000;
+    } catch (error) {
+        return true;
+    }
+};
+
 const refreshAccessToken = (refreshToken) => {
     return axios
         .post(API_ENDPOINT + "/User/refresh-token", { refreshToken })
@@ -29,12 +38,17 @@ axios.interceptors.request.use(
     async (config) => {
         const user = getCurrentUser();
         if (user && user.accessToken && isTokenExpired(user.accessToken)) {
-            try {
-                const { refreshToken } = user;
-                const refreshedUser = await refreshAccessToken(refreshToken);
-                config.headers.Authorization = `Bearer ${refreshedUser.accessToken}`;
-            } catch (error) {
-                console.error("Error refreshing access token: ", error);
+            if (isRefreshTokenExpired(user.refreshToken)) {
+                // Wyloguj użytkownika, jeśli refresh token jest przeterminowany
+                await logout();
+            } else {
+                try {
+                    const { refreshToken } = user;
+                    const refreshedUser = await refreshAccessToken(refreshToken);
+                    config.headers.Authorization = `Bearer ${refreshedUser.accessToken}`;
+                } catch (error) {
+                    console.error("Error refreshing access token: ", error);
+                }
             }
         } else if (user && user.accessToken) {
             config.headers.Authorization = `Bearer ${user.accessToken}`;
