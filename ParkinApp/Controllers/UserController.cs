@@ -10,10 +10,12 @@ namespace ParkinApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ITokenService tokenService)
         {
             _userService = userService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -70,5 +72,17 @@ namespace ParkinApp.Controllers
                 refreshToken = userDto.RefreshToken
             });
         }
+        
+        [HttpGet("getrefreshtoken/{userLogin}")]
+        public async Task<ActionResult<string>> GetRefreshToken(string userLogin)
+        {
+            var refreshToken = await _tokenService.GetRefreshTokenAsync(userLogin);
+            if (refreshToken == null)
+            {
+                return NotFound("Refresh token not found.");
+            }
+            return Ok(refreshToken);
+        }
+
     }
 }

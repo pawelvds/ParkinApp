@@ -84,6 +84,5 @@ public class TokenService : ITokenService
         var refreshTokenKey = $"RefreshToken-{userLogin}";
         return await _distributedCache.GetStringAsync(refreshTokenKey);
     }
-
-
+    
 }

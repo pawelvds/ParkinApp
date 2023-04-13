@@ -34,12 +34,32 @@ const refreshAccessToken = (refreshToken) => {
         });
 };
 
+const scheduleRefresh = (user) => {
+    if (!user || !user.accessToken || !user.refreshToken) {
+        return;
+    }
+
+    const decodedToken = jwt_decode(user.accessToken);
+    const expiresIn = decodedToken.exp * 1000 - Date.now() - 300000; // 5 mins earlier
+
+    if (expiresIn > 0) {
+        setTimeout(async () => {
+            try {
+                const { refreshToken } = user;
+                const refreshedUser = await refreshAccessToken(refreshToken);
+                scheduleRefresh(refreshedUser);
+            } catch (error) {
+                console.error("Error refreshing access token: ", error);
+            }
+        }, expiresIn);
+    }
+};
+
 axios.interceptors.request.use(
     async (config) => {
         const user = getCurrentUser();
         if (user && user.accessToken && isTokenExpired(user.accessToken)) {
             if (isRefreshTokenExpired(user.refreshToken)) {
-                // Wyloguj użytkownika, jeśli refresh token jest przeterminowany
                 await logout();
             } else {
                 try {
@@ -84,6 +104,7 @@ const login = (username, password) => {
         .then((response) => {
             if (response.data.accessToken) {
                 localStorage.setItem("user", JSON.stringify(response.data));
+                scheduleRefresh(response.data);
             }
 
             return response.data;

@@ -21,6 +21,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>();
@@ -73,6 +74,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors("AllowReactApp");
+
 
 app.MapControllers();
 
