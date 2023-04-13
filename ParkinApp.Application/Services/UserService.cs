@@ -109,7 +109,5 @@ namespace ParkinApp.Services
                 newRefreshToken
             ));
         }
-
-
     }
 }

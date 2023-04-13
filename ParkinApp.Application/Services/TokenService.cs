@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
@@ -13,11 +14,12 @@ public class TokenService : ITokenService
 {
     private readonly SymmetricSecurityKey _key;
     private readonly IUserRepository _userRepository;
-
-    public TokenService(IConfiguration config, IUserRepository userRepository)
+    private readonly IDistributedCache _distributedCache;
+    public TokenService(IConfiguration config, IUserRepository userRepository, IDistributedCache distributedCache)
     {
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? throw new InvalidOperationException()));
         _userRepository = userRepository;
+        _distributedCache = distributedCache;
     }
 
     public string CreateToken(User user)
@@ -54,20 +56,34 @@ public class TokenService : ITokenService
 
     public async Task StoreRefreshTokenAsync(User user, string refreshToken)
     {
-        user.RefreshToken = refreshToken;
+        var refreshTokenKey = $"RefreshToken-{user.Login}";
         user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddDays(7).ToLocalTime();
+        await _distributedCache.SetStringAsync(refreshTokenKey, refreshToken,
+            new DistributedCacheEntryOptions
+                { AbsoluteExpiration = user.RefreshTokenExpiryDate });
+    
         await _userRepository.UpdateAsync(user);
     }
-
 
     public async Task InvalidateTokenAsync(string refreshToken)
     {
         var user = await _userRepository.GetUserByRefreshToken(refreshToken);
         if (user != null)
         {
+            var refreshTokenKey = $"RefreshToken-{user.Login}";
+            await _distributedCache.RemoveAsync(refreshTokenKey);
+        
             user.RefreshToken = string.Empty;
             user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
             await _userRepository.UpdateAsync(user);
         }
     }
+    
+    public async Task<string?> GetRefreshTokenAsync(string userLogin)
+    {
+        var refreshTokenKey = $"RefreshToken-{userLogin}";
+        return await _distributedCache.GetStringAsync(refreshTokenKey);
+    }
+
+
 }

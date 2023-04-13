@@ -47,6 +47,12 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
+// Redis configuration
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379"; // Redis address
+});
+
 
 var app = builder.Build();
 
