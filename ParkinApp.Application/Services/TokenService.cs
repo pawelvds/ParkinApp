@@ -34,7 +34,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(1),
+            Expires = DateTime.UtcNow.AddMinutes(15),
             SigningCredentials = creds
         };
 
@@ -57,7 +57,7 @@ public class TokenService : ITokenService
     public async Task StoreRefreshTokenAsync(User user, string refreshToken)
     {
         var refreshTokenKey = $"RefreshToken-{user.Login}";
-        user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddDays(7).ToLocalTime();
+        user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddHours(1);
         await _distributedCache.SetStringAsync(refreshTokenKey, refreshToken,
             new DistributedCacheEntryOptions
                 { AbsoluteExpiration = user.RefreshTokenExpiryDate });

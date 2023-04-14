@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.DTOs;
@@ -5,6 +6,7 @@ using ParkinApp.Domain.DTOs;
 
 namespace ParkinApp.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -17,7 +19,8 @@ namespace ParkinApp.Controllers
             _userService = userService;
             _tokenService = tokenService;
         }
-
+        
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -29,7 +32,8 @@ namespace ParkinApp.Controllers
 
             return BadRequest(result.Errors);
         }
-
+        
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
@@ -58,21 +62,24 @@ namespace ParkinApp.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(LogoutDto logoutDto)
         {
+            Console.WriteLine("Received refresh token request: " + logoutDto.RefreshToken);
             var result = await _userService.RefreshTokenAsync(logoutDto.RefreshToken);
 
             if (result.IsFailure)
             {
+                Console.WriteLine("Refresh token request failed: " + string.Join(", ", result.Errors));
                 return BadRequest(result.Errors);
             }
 
             var userDto = result.Value;
+            Console.WriteLine("Refresh token request succeeded.");
             return Ok(new
             {
                 accessToken = userDto.AccessToken,
                 refreshToken = userDto.RefreshToken
             });
         }
-        
+
         [HttpGet("getrefreshtoken/{userLogin}")]
         public async Task<ActionResult<string>> GetRefreshToken(string userLogin)
         {
@@ -83,6 +90,6 @@ namespace ParkinApp.Controllers
             }
             return Ok(refreshToken);
         }
-
+        
     }
 }

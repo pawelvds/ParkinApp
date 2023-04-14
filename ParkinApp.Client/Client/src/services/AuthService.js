@@ -2,32 +2,51 @@ import axios from "axios";
 import jwt_decode from "jwt-decode";
 import API_ENDPOINT from "../config";
 
+
 const isTokenExpired = (token) => {
+    console.log('Checking if access token is expired');
+    if (!token) {
+        console.error('No token provided');
+        return true;
+    }
     try {
+        console.log('Token to decode:', token);
         const decodedToken = jwt_decode(token);
-        return decodedToken.exp < Date.now() / 1000;
+        const expired = decodedToken.exp < Date.now() / 1000;
+        if (expired) {
+            console.log('Access token is expired');
+        } else {
+            console.log('Access token is not expired');
+        }
+        return expired;
     } catch (error) {
+        console.error('Error checking access token expiration:', error);
         return true;
     }
 };
 
 const isRefreshTokenExpired = (token) => {
-    try {
-        const decodedToken = jwt_decode(token);
-        return decodedToken.exp < Date.now() / 1000;
-    } catch (error) {
-        return true;
+    const expired = token && jwt_decode(token).exp < Date.now() / 1000;
+    if (expired) {
+        console.log('Refresh token expired');
     }
+    return expired;
 };
 
 const refreshAccessToken = async (refreshToken) => {
     try {
+        console.log("Sending refresh token request...");
         const response = await axios.post(API_ENDPOINT + "/User/refresh-token", { refreshToken });
-        if (response.data.accessToken) {
+        console.log("Refresh token response:", response);
+
+        if (response.status === 200) {
+            const { accessToken, refreshToken: newRefreshToken } = response.data;
+            console.log('New access token to decode:', accessToken);
             const user = getCurrentUser();
-            user.accessToken = response.data.accessToken;
+            user.accessToken = accessToken;
+            user.refreshToken = newRefreshToken;
             localStorage.setItem("user", JSON.stringify(user));
-            return response.data;
+            return user;
         }
     } catch (error) {
         console.error("Error refreshing access token: ", error);
@@ -39,22 +58,34 @@ const refreshAccessToken = async (refreshToken) => {
 
 const scheduleRefresh = (user) => {
     if (!user || !user.accessToken || !user.refreshToken) {
+        console.log("User or tokens are missing:", user);
         return;
     }
 
     const decodedToken = jwt_decode(user.accessToken);
     const expiresIn = decodedToken.exp * 1000 - Date.now() - 300000; // 5 mins earlier
 
+    console.log("Scheduling token refresh in (ms):", expiresIn);
+
     if (expiresIn > 0) {
         setTimeout(async () => {
+            console.log("Refreshing access token...");
+
             try {
                 const { refreshToken } = user;
                 const refreshedUser = await refreshAccessToken(refreshToken);
+                console.log("Access token refreshed:", refreshedUser);
                 scheduleRefresh(refreshedUser);
             } catch (error) {
                 console.error("Error refreshing access token: ", error);
+                logout();
+                window.location.href = "/login"; 
             }
         }, expiresIn);
+    } else {
+        console.log("Access token is already expired.");
+        logout();
+        window.location.href = "/login";
     }
 };
 
@@ -107,6 +138,8 @@ const login = (username, password) => {
         })
         .then((response) => {
             if (response.data.accessToken) {
+                localStorage.removeItem("user");
+
                 localStorage.setItem("user", JSON.stringify(response.data));
                 scheduleRefresh(response.data);
             }
