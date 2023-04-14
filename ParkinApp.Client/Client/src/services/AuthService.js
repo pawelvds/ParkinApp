@@ -1,7 +1,6 @@
 import axios from "axios";
-import jwt_decode from "jwt-decode";
+import jwt from 'jsonwebtoken';
 import API_ENDPOINT from "../config";
-
 
 const isTokenExpired = (token) => {
     console.log('Checking if access token is expired');
@@ -11,7 +10,7 @@ const isTokenExpired = (token) => {
     }
     try {
         console.log('Token to decode:', token);
-        const decodedToken = jwt_decode(token);
+        const decodedToken = jwt.decode(token);
         const expired = decodedToken.exp < Date.now() / 1000;
         if (expired) {
             console.log('Access token is expired');
@@ -26,7 +25,7 @@ const isTokenExpired = (token) => {
 };
 
 const isRefreshTokenExpired = (token) => {
-    const expired = token && jwt_decode(token).exp < Date.now() / 1000;
+    const expired = token && jwt.decode(token).exp < Date.now() / 1000;
     if (expired) {
         console.log('Refresh token expired');
     }
@@ -62,7 +61,7 @@ const scheduleRefresh = (user) => {
         return;
     }
 
-    const decodedToken = jwt_decode(user.accessToken);
+    const decodedToken = jwt.decode(user.accessToken);
     const expiresIn = decodedToken.exp * 1000 - Date.now() - 300000; // 5 mins earlier
 
     console.log("Scheduling token refresh in (ms):", expiresIn);
