@@ -8,6 +8,6 @@ namespace ParkinApp.Domain.Abstractions.Services
         string CreateRefreshToken();
         Task StoreRefreshTokenAsync(User user, string refreshToken);
         Task InvalidateTokenAsync(string refreshToken);
-        Task<string?> GetRefreshTokenAsync(string userLogin);
+        Task<int?> GetRefreshTokenAsync(string userLogin);
     }
 }

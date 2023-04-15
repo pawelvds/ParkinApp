@@ -48,7 +48,7 @@ namespace ParkinApp.Services
 
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userRepository.GetUserByUsername(loginDto.Username);
+            var user = await _userRepository.GetUserByUsernameAsync((loginDto.Username));
 
             if (user == null)
                 return Result<UserDto>.Failure(new List<string> { "Invalid username or password" });
@@ -83,19 +83,24 @@ namespace ParkinApp.Services
                 return Result<UserDto>.Failure(new List<string> { "Invalid refresh token" });
             }
 
-            user.RefreshToken = string.Empty;
-            user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
-            await _userRepository.UpdateAsync(user);
-
-            return Result<UserDto>.Success();
+            await _tokenService.InvalidateTokenAsync(refreshToken);
+            return Result<UserDto>.Success(null);
         }
 
         public async Task<Result<UserDto>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userRepository.GetUserByRefreshToken(refreshToken);
+            Console.WriteLine($"User from database: {user?.Login}, RefreshToken: {user?.RefreshToken}, RefreshTokenExpiryDate: {user?.RefreshTokenExpiryDate}");
 
-            if (user == null || user.RefreshTokenExpiryDate < DateTimeOffset.Now)
+            if (user == null)
             {
+                Console.WriteLine("Invalid refresh token");
+                return Result<UserDto>.Failure(new List<string> { "Invalid refresh token" });
+            }
+
+            if (user.RefreshTokenExpiryDate < DateTimeOffset.Now)
+            {
+                Console.WriteLine("Expired refresh token");
                 return Result<UserDto>.Failure(new List<string> { "Invalid or expired refresh token" });
             }
 
@@ -109,5 +114,6 @@ namespace ParkinApp.Services
                 newRefreshToken
             ));
         }
+
     }
 }

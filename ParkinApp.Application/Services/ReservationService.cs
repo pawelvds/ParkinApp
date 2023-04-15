@@ -27,7 +27,7 @@ namespace ParkinApp.Services
 
         public async Task<Result<ReservationResultDto>> CreateReservationAsync(CreateReservationDto reservationDto, string userId)
         {
-            var user = await _userRepository.GetUserByUsername(userId);
+            var user = await _userRepository.GetUserByUsernameAsync(userId);
 
             var userActiveReservation = await _reservationRepository.GetActiveReservationByUserIdAsync(user.Id);
             if (userActiveReservation != null)
@@ -74,7 +74,7 @@ namespace ParkinApp.Services
         
         public async Task<Result<string>> CancelReservationAsync(string userId)
         {
-            var user = await _userRepository.GetUserByUsername(userId);
+            var user = await _userRepository.GetUserByUsernameAsync(userId);
 
             if (user == null)
             {

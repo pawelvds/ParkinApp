@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.DTOs;
 
-
 namespace ParkinApp.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -20,7 +18,6 @@ namespace ParkinApp.Controllers
             _tokenService = tokenService;
         }
         
-        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -46,6 +43,7 @@ namespace ParkinApp.Controllers
             return Unauthorized(result.Errors);
         }
         
+        [AllowAnonymous]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(LogoutDto logoutDto)
         {
@@ -58,14 +56,15 @@ namespace ParkinApp.Controllers
 
             return Ok();
         }
-
+        
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(LogoutDto logoutDto)
         {
             Console.WriteLine("Received refresh token request: " + logoutDto.RefreshToken);
             var result = await _userService.RefreshTokenAsync(logoutDto.RefreshToken);
 
-            if (result.IsFailure)
+            if (result.IsFailure || result.Value == null)
             {
                 Console.WriteLine("Refresh token request failed: " + string.Join(", ", result.Errors));
                 return BadRequest(result.Errors);
@@ -80,6 +79,7 @@ namespace ParkinApp.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpGet("getrefreshtoken/{userLogin}")]
         public async Task<ActionResult<string>> GetRefreshToken(string userLogin)
         {

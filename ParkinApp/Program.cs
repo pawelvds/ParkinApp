@@ -9,6 +9,7 @@ using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Middlewares;
 using ParkinApp.Validators;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,10 @@ builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>();
 builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
+builder.Services.AddScoped<IRedisService, RedisService>();
 
 builder.Services.AddMemoryCache();
 
@@ -49,11 +54,11 @@ builder.Services.AddCors(options =>
 });
 
 // Redis configuration
+// Redis configuration
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379"; // Redis address
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
-
 
 var app = builder.Build();
 

@@ -4,8 +4,8 @@ namespace ParkinApp.Domain.Abstractions.Repositories
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        Task<User?> GetUserByUsername(string username);
         Task<bool> UserExists(string username);
         Task<User?> GetUserByRefreshToken(string refreshToken);
+        Task<User?> GetUserByUsernameAsync(string username);
     }
 }
