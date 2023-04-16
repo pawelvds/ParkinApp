@@ -191,13 +191,6 @@ namespace ParkinApp.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("RefreshToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("RefreshTokenExpiryDate")
-                        .HasColumnType("datetimeoffset");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Login")

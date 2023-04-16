@@ -12,7 +12,7 @@ using ParkinApp.Persistence.Data;
 namespace ParkinApp.Persistence.Migrations
 {
     [DbContext(typeof(ParkingDbContext))]
-    [Migration("20230410122727_UpdateUserEntity")]
+    [Migration("20230416154032_UpdateUserEntity")]
     partial class UpdateUserEntity
     {
         /// <inheritdoc />
@@ -193,13 +193,6 @@ namespace ParkinApp.Persistence.Migrations
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("RefreshToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiryDate")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

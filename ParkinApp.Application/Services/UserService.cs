@@ -12,11 +12,13 @@ namespace ParkinApp.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
+        private readonly IRedisService _redisService;
 
-        public UserService(IUserRepository userRepository, ITokenService tokenService)
+        public UserService(IUserRepository userRepository, ITokenService tokenService, IRedisService redisService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _redisService = redisService;
         }
 
         public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto)
@@ -37,14 +39,16 @@ namespace ParkinApp.Services
 
             var accessToken = _tokenService.CreateToken(user);
             var refreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, refreshToken);
-
+            
+            await _redisService.SetRefreshTokenAsync(refreshToken, user.Id, TimeSpan.FromDays(7));
+            
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
                 accessToken,
                 refreshToken
             ));
         }
+
 
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
         {
@@ -65,7 +69,8 @@ namespace ParkinApp.Services
 
             var accessToken = _tokenService.CreateToken(user);
             var refreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, refreshToken);
+            
+            await _redisService.SetRefreshTokenAsync(refreshToken, user.Id, TimeSpan.FromDays(7));
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
@@ -90,23 +95,20 @@ namespace ParkinApp.Services
         public async Task<Result<UserDto>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userRepository.GetUserByRefreshToken(refreshToken);
-            Console.WriteLine($"User from database: {user?.Login}, RefreshToken: {user?.RefreshToken}, RefreshTokenExpiryDate: {user?.RefreshTokenExpiryDate}");
 
             if (user == null)
             {
-                Console.WriteLine("Invalid refresh token");
                 return Result<UserDto>.Failure(new List<string> { "Invalid refresh token" });
-            }
-
-            if (user.RefreshTokenExpiryDate < DateTimeOffset.Now)
-            {
-                Console.WriteLine("Expired refresh token");
-                return Result<UserDto>.Failure(new List<string> { "Invalid or expired refresh token" });
             }
 
             var accessToken = _tokenService.CreateToken(user);
             var newRefreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, newRefreshToken);
+
+            // Remove the old refresh token from Redis
+            await _redisService.RemoveRefreshTokenAsync(refreshToken);
+
+            // Set the new refresh token in Redis
+            await _redisService.SetRefreshTokenAsync(newRefreshToken, user.Id, TimeSpan.FromHours(1));
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,

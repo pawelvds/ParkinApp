@@ -30,8 +30,6 @@ public class RedisService : IRedisService
         return (int)userId;
     }
 
-
-
     public async Task RemoveRefreshTokenAsync(string refreshToken)
     {
         var db = _redis.GetDatabase();

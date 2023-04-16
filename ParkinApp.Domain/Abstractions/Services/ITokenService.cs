@@ -6,7 +6,6 @@ namespace ParkinApp.Domain.Abstractions.Services
     {
         string CreateToken(User user);
         string CreateRefreshToken();
-        Task StoreRefreshTokenAsync(User user, string refreshToken);
         Task InvalidateTokenAsync(string refreshToken);
         Task<int?> GetRefreshTokenAsync(string userLogin);
     }

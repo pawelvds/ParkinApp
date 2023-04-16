@@ -55,14 +55,6 @@ namespace ParkinApp.Services
             return refreshToken;
         }
 
-        public async Task StoreRefreshTokenAsync(User user, string refreshToken)
-        {
-            user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddHours(1);
-            await _redisService.SetRefreshTokenAsync(refreshToken, user.Id,
-                user.RefreshTokenExpiryDate - DateTimeOffset.UtcNow);
-            await _userRepository.UpdateAsync(user);
-        }
-
         public async Task InvalidateTokenAsync(string refreshToken)
         {
             await _redisService.RemoveRefreshTokenAsync(refreshToken);
