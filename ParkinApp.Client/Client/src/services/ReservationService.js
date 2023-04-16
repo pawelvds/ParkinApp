@@ -16,9 +16,17 @@ const createReservation = async (parkingSpotId, token) => {
 };
 
 const cancelReservation = async (token) => {
+    console.log("Token in ReservationService:", token);
     const headers = { Authorization: `Bearer ${token}` };
-    const response = await axios.delete(API_URL + "cancel", { headers });
-    return response.data;
+    try {
+        const response = await axios.delete(API_URL + "cancel", { headers: headers });
+        return response.data;
+    } catch (error) {
+        console.error("Error while cancelling reservation:", error);
+        console.error("Error details:", error.response);
+        throw error;
+    }
 };
+
 
 export { createReservation, cancelReservation };
