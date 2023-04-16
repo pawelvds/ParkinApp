@@ -17,6 +17,7 @@ function App() {
     }
   }, []);
 
+
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user && AuthService.isTokenExpired(user.accessToken)) {
@@ -81,7 +82,10 @@ function App() {
 
         <div className="container mt-3">
           <Routes>
-            <Route path="/home" element={<Home currentUser={currentUser} />} />
+            <Route
+                path="/home"
+                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()} />}
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/logout" element={<Logout onLogout={handleLogout} />} />

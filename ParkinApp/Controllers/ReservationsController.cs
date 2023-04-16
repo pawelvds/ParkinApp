@@ -6,7 +6,7 @@ using ParkinApp.Domain.DTOs;
 
 namespace ParkinApp.Controllers
 {
-    [Authorize]
+
     [Route("api/[controller]")]
     [ApiController]
     public class ReservationsController : ControllerBase

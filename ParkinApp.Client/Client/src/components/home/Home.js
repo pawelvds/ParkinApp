@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import ParkingSpotService from "../../services/ParkingSpotService";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
+import ReservationForm from "../forms/ReservationForm";
+import CancelReservationButton from "../buttons/CancelReservationButton";
 
 const Home = ({ currentUser }) => {
     const [parkingSpots, setParkingSpots] = useState([]);
 
-    useEffect(() => {
+    const refreshSpots = () => {
         ParkingSpotService.getParkingSpots()
             .then((response) => setParkingSpots(response.data))
             .catch((error) => console.error(error));
+    };
+
+    useEffect(() => {
+        refreshSpots();
     }, []);
 
     return (
@@ -35,12 +41,21 @@ const Home = ({ currentUser }) => {
                                             Time Zone: {parkingSpot.spotTimeZone} <br />
                                             Reserved by:
                                         </Card.Text>
-                                        <Button variant="primary">Reserve</Button>
+                                        <ReservationForm
+                                            parkingSpotId={parkingSpot.id}
+                                            refreshSpots={refreshSpots}
+                                        />
                                     </Card.Body>
                                 </Card>
                             </Col>
                         ))}
                     </Row>
+                    <div style={{ marginTop: "20px" }}>
+                        <h3>Your Reservations:</h3>
+                        <CancelReservationButton
+                            refreshSpots={refreshSpots}
+                        />
+                    </div>
                 </>
             )}
         </Container>
