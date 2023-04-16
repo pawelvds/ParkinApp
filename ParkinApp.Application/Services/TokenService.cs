@@ -7,67 +7,67 @@ using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Entities;
 
-namespace ParkinApp.Services;
-
-public class TokenService : ITokenService
+namespace ParkinApp.Services
 {
-    private readonly SymmetricSecurityKey _key;
-    private readonly IUserRepository _userRepository;
-
-    public TokenService(IConfiguration config, IUserRepository userRepository)
+    public class TokenService : ITokenService
     {
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? throw new InvalidOperationException()));
-        _userRepository = userRepository;
-    }
+        private readonly SymmetricSecurityKey _key;
+        private readonly IUserRepository _userRepository;
+        private readonly IRedisService _redisService;
 
-    public string CreateToken(User user)
-    {
-        var claims = new List<Claim>
+        public TokenService(IConfiguration config, IUserRepository userRepository, IRedisService redisService)
         {
-            new Claim(JwtRegisteredClaimNames.NameId, user.Login)
-        };
-
-        var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
-
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = creds
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-
-        return tokenHandler.WriteToken(token);
-    }
-
-    public string CreateRefreshToken()
-    {
-        var randomNumber = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            _key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(config["TokenKey"] ?? throw new InvalidOperationException()));
+            _userRepository = userRepository;
+            _redisService = redisService;
         }
-    }
 
-    public async Task StoreRefreshTokenAsync(User user, string refreshToken)
-    {
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddDays(7).ToLocalTime();
-        await _userRepository.UpdateAsync(user);
-    }
-
-
-    public async Task InvalidateTokenAsync(string refreshToken)
-    {
-        var user = await _userRepository.GetUserByRefreshToken(refreshToken);
-        if (user != null)
+        public string CreateToken(User user)
         {
-            user.RefreshToken = string.Empty;
-            user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
-            await _userRepository.UpdateAsync(user);
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.NameId, user.Login)
+            };
+
+            var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                SigningCredentials = creds
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        public string CreateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            var refreshToken = Convert.ToBase64String(randomNumber);
+
+            return refreshToken;
+        }
+
+        public async Task InvalidateTokenAsync(string refreshToken)
+        {
+            await _redisService.RemoveRefreshTokenAsync(refreshToken);
+        }
+
+        public async Task<int?> GetRefreshTokenAsync(string userLogin)
+        {
+            var user = await _userRepository.GetUserByUsernameAsync(userLogin);
+            if (user == null) return null;
+
+            var refreshToken = await _redisService.GetUserIdByRefreshTokenAsync(user.Id.ToString());
+            
+            return refreshToken;
         }
     }
 }

@@ -3,119 +3,129 @@ import jwt_decode from "jwt-decode";
 import API_ENDPOINT from "../config";
 
 const isTokenExpired = (token) => {
+    if (!token) {
+        console.error("No token provided");
+        return true;
+    }
     try {
         const decodedToken = jwt_decode(token);
-        return decodedToken.exp < Date.now() / 1000;
+        const expired = decodedToken.exp < Date.now() / 1000;
+        return expired;
     } catch (error) {
+        console.error("Error checking access token expiration:", error);
         return true;
     }
 };
 
-const isRefreshTokenExpired = (token) => {
+const refreshAccessToken = async (refreshToken) => {
     try {
-        const decodedToken = jwt_decode(token);
-        return decodedToken.exp < Date.now() / 1000;
-    } catch (error) {
-        return true;
-    }
-};
+        const response = await axios.post(API_ENDPOINT + "/api/User/refresh-token", { refreshToken: refreshToken });
 
-const refreshAccessToken = (refreshToken) => {
-    return axios
-        .post(API_ENDPOINT + "/User/refresh-token", { refreshToken })
-        .then((response) => {
-            if (response.data.accessToken) {
-                const user = getCurrentUser();
-                user.accessToken = response.data.accessToken;
-                localStorage.setItem("user", JSON.stringify(user));
-            }
-
-            return response.data;
-        });
-};
-
-axios.interceptors.request.use(
-    async (config) => {
-        const user = getCurrentUser();
-        if (user && user.accessToken && isTokenExpired(user.accessToken)) {
-            if (isRefreshTokenExpired(user.refreshToken)) {
-                // Wyloguj użytkownika, jeśli refresh token jest przeterminowany
-                await logout();
-            } else {
-                try {
-                    const { refreshToken } = user;
-                    const refreshedUser = await refreshAccessToken(refreshToken);
-                    config.headers.Authorization = `Bearer ${refreshedUser.accessToken}`;
-                } catch (error) {
-                    console.error("Error refreshing access token: ", error);
-                }
-            }
-        } else if (user && user.accessToken) {
-            config.headers.Authorization = `Bearer ${user.accessToken}`;
+        if (response.data.accessToken) {
+            const user = {
+                ...JSON.parse(localStorage.getItem("user")),
+                accessToken: response.data.accessToken,
+                refreshToken: response.data.refreshToken,
+            };
+            localStorage.setItem("user", JSON.stringify(user));
+            return user;
         }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+    } catch (error) {
+        console.error("Error refreshing access token:", error);
+        throw error;
     }
-);
-
-const register = (username, password) => {
-    return axios
-        .post(API_ENDPOINT + "/User/register", {
-            username,
-            password,
-        })
-        .then((response) => {
-            if (response.data.accessToken) {
-                localStorage.setItem("user", JSON.stringify(response.data));
-            }
-
-            return response.data;
-        });
 };
 
-const login = (username, password) => {
-    return axios
-        .post(API_ENDPOINT + "/User/login", {
-            username,
-            password,
-        })
-        .then((response) => {
-            if (response.data.accessToken) {
-                localStorage.setItem("user", JSON.stringify(response.data));
-            }
-
-            return response.data;
-        });
-};
-
-const logout = () => {
-    const user = getCurrentUser();
-    if (user && user.refreshToken) {
-        return axios
-            .post(API_ENDPOINT + "/User/logout", { refreshToken: user.refreshToken })
-            .then(() => {
-                localStorage.removeItem("user");
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    } else {
-        localStorage.removeItem("user");
-        return Promise.resolve();
+const requestWithAuth = async (url, options = {}) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+        throw new Error("User not found");
     }
+
+    if (isTokenExpired(user.accessToken)) {
+        try {
+            await refreshAccessToken(user.refreshToken);
+        } catch (error) {
+            console.error("Error refreshing access token:", error);
+            throw error;
+        }
+    }
+
+    const updatedUser = JSON.parse(localStorage.getItem("user"));
+    const authOptions = {
+        ...options,
+        headers: {
+            ...options.headers,
+            Authorization: `Bearer ${updatedUser.accessToken}`,
+        },
+    };
+
+    return axios(url, authOptions);
 };
 
 const getCurrentUser = () => {
-    return JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user;
 };
 
+const login = async (userName, password) => {
+    try {
+        const response = await axios.post(API_ENDPOINT + '/api/User/login', {
+            userName,
+            password,
+        });
+
+        if (response.data.accessToken) {
+            localStorage.setItem('user', JSON.stringify(response.data));
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error('Error logging in:', error);
+        console.error('Error response:', error.response);
+        console.error('Error request:', error.request);
+        console.error('Error response data:', error.response.data);
+        throw error;
+    }
+};
+
+const logout = () => {
+    return new Promise((resolve) => {
+        localStorage.removeItem("user");
+        resolve();
+    });
+};
+
+const register = async (userName, password) => {
+    try {
+        const response = await axios.post(API_ENDPOINT + "/api/User/register", {
+            userName,
+            password,
+        });
+
+        if (response.data.accessToken) {
+            localStorage.setItem("user", JSON.stringify(response.data));
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error("Error registering user:", error);
+        console.error("Error response:", error.response);
+        console.error("Error request:", error.request);
+        console.error("Error response data:", error.response.data);
+        throw error;
+    }
+};
+
+
 const AuthService = {
-    register,
+    isTokenExpired,
+    refreshAccessToken,
+    requestWithAuth,
+    getCurrentUser,
     login,
     logout,
-    getCurrentUser,
+    register,
 };
 
 export default AuthService;

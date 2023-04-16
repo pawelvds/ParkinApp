@@ -17,6 +17,18 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const user = AuthService.getCurrentUser();
+    if (user && AuthService.isTokenExpired(user.accessToken)) {
+      AuthService.refreshAccessToken(user.refreshToken).catch((error) => {
+        console.error("Error refreshing access token:", error);
+        AuthService.logout().then(() => {
+          window.location.href = "/login";
+        });
+      });
+    }
+  }, []);
+
   const handleLogout = () => {
     AuthService.logout().then(() => setCurrentUser(undefined));
   };

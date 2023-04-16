@@ -12,11 +12,13 @@ namespace ParkinApp.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
+        private readonly IRedisService _redisService;
 
-        public UserService(IUserRepository userRepository, ITokenService tokenService)
+        public UserService(IUserRepository userRepository, ITokenService tokenService, IRedisService redisService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _redisService = redisService;
         }
 
         public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto)
@@ -37,8 +39,9 @@ namespace ParkinApp.Services
 
             var accessToken = _tokenService.CreateToken(user);
             var refreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, refreshToken);
-
+            
+            await _redisService.SetRefreshTokenAsync(refreshToken, user.Id, TimeSpan.FromDays(7));
+            
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
                 accessToken,
@@ -46,9 +49,10 @@ namespace ParkinApp.Services
             ));
         }
 
+
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userRepository.GetUserByUsername(loginDto.Username);
+            var user = await _userRepository.GetUserByUsernameAsync((loginDto.Username));
 
             if (user == null)
                 return Result<UserDto>.Failure(new List<string> { "Invalid username or password" });
@@ -65,7 +69,8 @@ namespace ParkinApp.Services
 
             var accessToken = _tokenService.CreateToken(user);
             var refreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, refreshToken);
+            
+            await _redisService.SetRefreshTokenAsync(refreshToken, user.Id, TimeSpan.FromDays(7));
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
@@ -83,25 +88,27 @@ namespace ParkinApp.Services
                 return Result<UserDto>.Failure(new List<string> { "Invalid refresh token" });
             }
 
-            user.RefreshToken = string.Empty;
-            user.RefreshTokenExpiryDate = DateTimeOffset.MinValue;
-            await _userRepository.UpdateAsync(user);
-
-            return Result<UserDto>.Success();
+            await _tokenService.InvalidateTokenAsync(refreshToken);
+            return Result<UserDto>.Success(null);
         }
 
         public async Task<Result<UserDto>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userRepository.GetUserByRefreshToken(refreshToken);
 
-            if (user == null || user.RefreshTokenExpiryDate < DateTimeOffset.Now)
+            if (user == null)
             {
-                return Result<UserDto>.Failure(new List<string> { "Invalid or expired refresh token" });
+                return Result<UserDto>.Failure(new List<string> { "Invalid refresh token" });
             }
 
             var accessToken = _tokenService.CreateToken(user);
             var newRefreshToken = _tokenService.CreateRefreshToken();
-            await _tokenService.StoreRefreshTokenAsync(user, newRefreshToken);
+
+            // Remove the old refresh token from Redis
+            await _redisService.RemoveRefreshTokenAsync(refreshToken);
+
+            // Set the new refresh token in Redis
+            await _redisService.SetRefreshTokenAsync(newRefreshToken, user.Id, TimeSpan.FromHours(1));
 
             return Result<UserDto>.Success(new UserDto(
                 user.Login,
@@ -109,7 +116,6 @@ namespace ParkinApp.Services
                 newRefreshToken
             ));
         }
-
 
     }
 }
