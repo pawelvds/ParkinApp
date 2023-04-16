@@ -5,6 +5,7 @@ using ParkinApp.Domain.DTOs;
 
 namespace ParkinApp.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -18,6 +19,7 @@ namespace ParkinApp.Controllers
             _tokenService = tokenService;
         }
         
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -43,7 +45,6 @@ namespace ParkinApp.Controllers
             return Unauthorized(result.Errors);
         }
         
-        [AllowAnonymous]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(LogoutDto logoutDto)
         {
@@ -79,7 +80,6 @@ namespace ParkinApp.Controllers
             });
         }
 
-        [AllowAnonymous]
         [HttpGet("getrefreshtoken/{userLogin}")]
         public async Task<ActionResult<string>> GetRefreshToken(string userLogin)
         {

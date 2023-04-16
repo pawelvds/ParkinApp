@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Abstractions.Services;
@@ -64,9 +60,6 @@ namespace ParkinApp.Services
             user.RefreshTokenExpiryDate = DateTimeOffset.UtcNow.AddHours(1);
             await _redisService.SetRefreshTokenAsync(refreshToken, user.Id,
                 user.RefreshTokenExpiryDate - DateTimeOffset.UtcNow);
-
-            Console.WriteLine($"Stored refresh token: {refreshToken} for user {user.Login} in cache");
-
             await _userRepository.UpdateAsync(user);
         }
 
@@ -81,9 +74,7 @@ namespace ParkinApp.Services
             if (user == null) return null;
 
             var refreshToken = await _redisService.GetUserIdByRefreshTokenAsync(user.Id.ToString());
-
-            Console.WriteLine($"Retrieved refresh token: {refreshToken} for user {userLogin} from cache");
-
+            
             return refreshToken;
         }
     }
