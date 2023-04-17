@@ -23,15 +23,20 @@ namespace ParkinApp.Domain.Abstractions.Services
 
         public async Task<List<ParkingSpotDto>> GetAllParkingSpotsAsync()
         {
-            var parkingSpots = await _parkingSpotRepository.GetAllAsync();
-            return parkingSpots.Select(ps =>
+            var parkingSpots = await _parkingSpotRepository.GetAllParkingSpotsWithReservationsAsync();
+
+            var parkingSpotDtos = parkingSpots.Select(ps =>
             {
-                var activeReservation = ps.Reservations.FirstOrDefault(r => r.ReservationEndTime > DateTimeOffset.UtcNow);
+                var activeReservation = ps.Reservations
+                    .FirstOrDefault(r => r.ReservationEndTime > DateTimeOffset.UtcNow && r.User != null);
                 var reservedBy = activeReservation?.User?.Login;
                 var reserved = activeReservation != null;
 
                 return new ParkingSpotDto(ps.Id, ps.SpotTimeZone, reserved, reservedBy);
-            }).ToList();
+            });
+
+            return parkingSpotDtos.ToList();
         }
+
     }
 }
