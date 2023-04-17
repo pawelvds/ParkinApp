@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ParkinApp.Domain.Abstractions.Repositories;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Persistence.Data;
@@ -22,6 +23,12 @@ namespace ParkinApp.Persistence.Repositories
         {
             return _context.ParkingSpots;
         }
+        
+        public async Task<List<ParkingSpot>> GetAllParkingSpotsWithReservationsAsync()
+        {
+            return await _context.ParkingSpots.Include(ps => ps.Reservations).ThenInclude(r => r.User).ToListAsync();
+        }
+
 
     }
 }

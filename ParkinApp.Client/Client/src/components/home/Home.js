@@ -17,6 +17,28 @@ const Home = ({ currentUser }) => {
         refreshSpots();
     }, []);
 
+    const [occupiedParkingSpots, setOccupiedParkingSpots] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const occupiedSpotsPromises = parkingSpots.map(async (spot) => {
+                    const occupiedSpotData = await ParkingSpotService.getOccupiedParkingSpots(spot.id);
+                    return { ...spot, ...occupiedSpotData };
+                });
+
+                const updatedSpots = await Promise.all(occupiedSpotsPromises);
+                setParkingSpots(updatedSpots);
+            } catch (error) {
+                console.error('Error fetching occupied parking spots:', error);
+            }
+        };
+
+        if (parkingSpots.length > 0) {
+            fetchData();
+        }
+    }, [parkingSpots]);
+
     return (
         <Container>
             {!currentUser ? (
@@ -39,10 +61,11 @@ const Home = ({ currentUser }) => {
                                         <Card.Text>
                                             Spot ID: {parkingSpot.id} <br />
                                             Time Zone: {parkingSpot.spotTimeZone} <br />
-                                            Reserved by:
+                                            Reserved by: {parkingSpot.reservedBy ? parkingSpot.reservedBy : "Not reserved"}
                                         </Card.Text>
                                         <ReservationForm
                                             parkingSpotId={parkingSpot.id}
+                                            reserved={parkingSpot.reserved}
                                             refreshSpots={refreshSpots}
                                         />
                                     </Card.Body>

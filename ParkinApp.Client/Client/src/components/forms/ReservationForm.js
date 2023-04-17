@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { createReservation } from "../../services/ReservationService";
 import AuthService from "../../services/AuthService";
 
-const ReservationForm = ({ parkingSpotId }) => {
+const ReservationForm = ({ parkingSpotId, reserved }) => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
@@ -40,7 +40,7 @@ const ReservationForm = ({ parkingSpotId }) => {
             {success && (
                 <div className="alert alert-success">Reservation created successfully!</div>
             )}
-            <Button variant="primary" type="submit" disabled={loading}>
+            <Button variant="primary" type="submit" disabled={loading || reserved}>
                 {loading ? "Reserving..." : "Reserve"}
             </Button>
         </form>
