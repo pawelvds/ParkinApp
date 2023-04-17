@@ -17,5 +17,11 @@ namespace ParkinApp.Persistence.Repositories
         {
             return await _context.ParkingSpots.FindAsync(id);
         }
+        
+        public IQueryable<ParkingSpot> GetQueryable()
+        {
+            return _context.ParkingSpots;
+        }
+
     }
 }
