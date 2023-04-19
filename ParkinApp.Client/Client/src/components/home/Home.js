@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import ParkingSpotService from "../../services/ParkingSpotService";
-import { Container, Row, Col, Card } from "react-bootstrap";
-import ReservationForm from "../forms/ReservationForm";
-import CancelReservationButton from "../buttons/CancelReservationButton";
+import { Container, Row } from "react-bootstrap";
+import OccupiedFreeSpots from "./Counter";
+import ParkingSpotCard from "./ParkingSpotCard";
+import YourReservations from "./CancelReservation";
 
 const Home = ({ currentUser }) => {
     const [parkingSpots, setParkingSpots] = useState([]);
+    const [occupiedSpots, setOccupiedSpots] = useState(0);
+    const [freeSpots, setFreeSpots] = useState(0);
 
     const refreshSpots = () => {
         ParkingSpotService.getParkingSpots()
@@ -17,6 +20,21 @@ const Home = ({ currentUser }) => {
         refreshSpots();
     }, []);
 
+    useEffect(() => {
+        const occupied = parkingSpots.filter(spot => spot.reserved).length;
+        const free = parkingSpots.length - occupied;
+
+        setOccupiedSpots(occupied);
+        setFreeSpots(free);
+    }, [parkingSpots]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshSpots();
+        }, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <Container>
             {!currentUser ? (
@@ -26,37 +44,21 @@ const Home = ({ currentUser }) => {
                         To see available parking spots and make reservations, please{" "}
                         <a href="/login">log in</a> or <a href="/register">sign up</a>.
                     </p>
+                    <OccupiedFreeSpots occupiedSpots={occupiedSpots} freeSpots={freeSpots} />
                 </>
             ) : (
                 <>
                     <h2>Parking Spots:</h2>
                     <Row>
                         {parkingSpots.map((parkingSpot) => (
-                            <Col md={3} key={parkingSpot.id}>
-                                <Card>
-                                    <Card.Body>
-                                        <Card.Title>{parkingSpot.name}</Card.Title>
-                                        <Card.Text>
-                                            Spot ID: {parkingSpot.id} <br />
-                                            Time Zone: {parkingSpot.spotTimeZone} <br />
-                                            Reserved by: {parkingSpot.reservedBy ? parkingSpot.reservedBy : "Not reserved"}
-                                        </Card.Text>
-                                        <ReservationForm
-                                            parkingSpotId={parkingSpot.id}
-                                            reserved={parkingSpot.reserved}
-                                            refreshSpots={refreshSpots}
-                                        />
-                                    </Card.Body>
-                                </Card>
-                            </Col>
+                            <ParkingSpotCard
+                                key={parkingSpot.id}
+                                parkingSpot={parkingSpot}
+                                refreshSpots={refreshSpots}
+                            />
                         ))}
                     </Row>
-                    <div style={{ marginTop: "20px" }}>
-                        <h3>Your Reservations:</h3>
-                        <CancelReservationButton
-                            refreshSpots={refreshSpots}
-                        />
-                    </div>
+                    <YourReservations refreshSpots={refreshSpots} />
                 </>
             )}
         </Container>
