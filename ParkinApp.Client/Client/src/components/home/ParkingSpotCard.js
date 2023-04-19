@@ -3,6 +3,10 @@ import { Col, Card } from "react-bootstrap";
 import ReservationForm from "../forms/ReservationForm";
 
 const ParkingSpotCard = ({ parkingSpot, refreshSpots }) => {
+    const handleReservation = () => {
+        refreshSpots();
+    };
+
     return (
         <Col md={3} key={parkingSpot.id}>
             <Card>
@@ -16,7 +20,7 @@ const ParkingSpotCard = ({ parkingSpot, refreshSpots }) => {
                     <ReservationForm
                         parkingSpotId={parkingSpot.id}
                         reserved={parkingSpot.reserved}
-                        refreshSpots={refreshSpots}
+                        onReservation={handleReservation}
                     />
                 </Card.Body>
             </Card>

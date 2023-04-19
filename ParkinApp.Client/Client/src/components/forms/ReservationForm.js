@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { createReservation } from "../../services/ReservationService";
 import AuthService from "../../services/AuthService";
 
-const ReservationForm = ({ parkingSpotId, reserved }) => {
+const ReservationForm = ({ parkingSpotId, reserved, onReservation }) => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
@@ -26,6 +26,9 @@ const ReservationForm = ({ parkingSpotId, reserved }) => {
             const response = await createReservation(parkingSpotId, token);
             setSuccess(true);
             console.log("Reservation created:", response);
+            if (onReservation) {
+                onReservation();
+            }
         } catch (error) {
             setError("Error creating reservation.");
             console.error("Error details:", error.response);
