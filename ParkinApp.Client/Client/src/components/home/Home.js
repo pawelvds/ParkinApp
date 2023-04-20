@@ -3,12 +3,15 @@ import ParkingSpotService from "../../services/ParkingSpotService";
 import { Container, Row } from "react-bootstrap";
 import OccupiedFreeSpots from "./Counter";
 import ParkingSpotCard from "./ParkingSpotCard";
-import YourReservations from "./CancelReservation";
+import CancelReservation from "./CancelReservation";
+import AuthService from "../../services/AuthService";
 
-const Home = ({ currentUser }) => {
+const Home = ({ currentUser, token }) => {
     const [parkingSpots, setParkingSpots] = useState([]);
     const [occupiedSpots, setOccupiedSpots] = useState(0);
     const [freeSpots, setFreeSpots] = useState(0);
+    const [message, setMessage] = useState(null);
+    const [userReservation, setUserReservation] = useState(null);
 
     const refreshSpots = () => {
         ParkingSpotService.getParkingSpots()
@@ -21,7 +24,7 @@ const Home = ({ currentUser }) => {
     }, []);
 
     useEffect(() => {
-        const occupied = parkingSpots.filter(spot => spot.reserved).length;
+        const occupied = parkingSpots.filter((spot) => spot.reserved).length;
         const free = parkingSpots.length - occupied;
 
         setOccupiedSpots(occupied);
@@ -34,6 +37,34 @@ const Home = ({ currentUser }) => {
         }, 30000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (currentUser) {
+            const userReservedSpot = parkingSpots.find(
+                (spot) => spot.reserved && spot.reservedBy.id === currentUser.id
+            );
+
+            if (userReservedSpot) {
+                setUserReservation(userReservedSpot.id);
+            } else {
+                setUserReservation(null);
+            }
+        }
+    }, [parkingSpots, currentUser]);
+
+    const isUserSpotReserved = (parkingSpot) => {
+        if (currentUser) {
+            return parkingSpot.reserved && parkingSpot.reservedBy.id === currentUser.id;
+        }
+        return false;
+    };
+
+    const handleMessage = (msg) => {
+        setMessage(msg);
+        setTimeout(() => {
+            setMessage(null);
+        }, 3000);
+    };
 
     return (
         <Container>
@@ -49,16 +80,36 @@ const Home = ({ currentUser }) => {
             ) : (
                 <>
                     <h2>Parking Spots:</h2>
+                    {userReservation ? (
+                        <p>
+                            Hi {currentUser.username}! You have reserved spot number {userReservation}.
+                        </p>
+                    ) : (
+                        <p>Hi {currentUser.username}! You do not have any reservations. Choose an available spot.</p>
+                    )}
+                    {message && (
+                        <div className={`alert ${message.type}`}>{message.content}</div>
+                    )}
                     <Row>
                         {parkingSpots.map((parkingSpot) => (
                             <ParkingSpotCard
                                 key={parkingSpot.id}
                                 parkingSpot={parkingSpot}
                                 refreshSpots={refreshSpots}
+                                handleMessage={handleMessage}
+                                setUserReservation={setUserReservation}
+                                currentUser={currentUser}
+                                token={token}
+                                isUserSpotReserved={isUserSpotReserved}
                             />
                         ))}
                     </Row>
-                    <YourReservations refreshSpots={refreshSpots} />
+                    <CancelReservation
+                        refreshSpots={refreshSpots}
+                        handleMessage={handleMessage}
+                        setUserReservation={setUserReservation}
+                        userReservation={userReservation}
+                    />
                 </>
             )}
         </Container>

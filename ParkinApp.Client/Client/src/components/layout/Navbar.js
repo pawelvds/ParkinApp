@@ -1,16 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../services/AuthService";
 
 const Navbar = ({ currentUser, onLogout }) => {
+    const navigate = useNavigate();
+
     const handleLogout = () => {
-        AuthService.logout().then(() => onLogout());
+        AuthService.logout().then(() => {
+            onLogout();
+            navigate("/home");
+        });
     };
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container-fluid">
-                <Link to={"/home"} className="navbar-brand">
+                <Link to={"/"} className="navbar-brand">
                     ParkinApp
                 </Link>
                 <button
@@ -28,9 +33,9 @@ const Navbar = ({ currentUser, onLogout }) => {
                     {currentUser ? (
                         <div className="navbar-nav ms-auto">
                             <li className="nav-item">
-                                <button className="nav-link btn btn-link" onClick={handleLogout}>
+                                <Link to="/logout" className="nav-link" onClick={handleLogout}>
                                     Logout
-                                </button>
+                                </Link>
                             </li>
                         </div>
                     ) : (

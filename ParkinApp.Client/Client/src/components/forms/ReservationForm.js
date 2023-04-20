@@ -3,50 +3,54 @@ import { Button } from "react-bootstrap";
 import { createReservation } from "../../services/ReservationService";
 import AuthService from "../../services/AuthService";
 
-const ReservationForm = ({ parkingSpotId, reserved, onReservation }) => {
+const ReservationForm = ({
+                             parkingSpotId,
+                             reserved,
+                             refreshSpots,
+                             setUserReservation,
+                             handleMessage,
+                             currentUser,
+                         }) => {
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState(null);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
+    const handleReserve = async () => {
         setLoading(true);
-        setError(null);
-        setSuccess(false);
-
         const token = AuthService.getAccessToken();
         if (!token) {
-            setError("Missing access token.");
+            handleMessage({
+                type: "alert-danger",
+                content: "Missing access token.",
+            });
             setLoading(false);
             return;
         }
 
         try {
-            const response = await createReservation(parkingSpotId, token);
-            setSuccess(true);
-            console.log("Reservation created:", response);
-            if (onReservation) {
-                onReservation();
-            }
+            await createReservation(parkingSpotId, token);
+            setUserReservation(parkingSpotId);
+            handleMessage({
+                type: "alert-success",
+                content: "Reservation created successfully!",
+            });
+            refreshSpots();
         } catch (error) {
-            setError("Error creating reservation.");
-            console.error("Error details:", error.response);
+            handleMessage({
+                type: "alert-danger",
+                content: "Error creating reservation.",
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <div className="alert alert-danger">{error}</div>}
-            {success && (
-                <div className="alert alert-success">Reservation created successfully!</div>
-            )}
-            <Button variant="primary" type="submit" disabled={loading || reserved}>
-                {loading ? "Reserving..." : "Reserve"}
-            </Button>
-        </form>
+        <Button
+            variant="primary"
+            disabled={reserved || loading}
+            onClick={handleReserve}
+        >
+            {reserved ? "Reserved" : loading ? "Reserving..." : "Reserve"}
+        </Button>
     );
 };
 
