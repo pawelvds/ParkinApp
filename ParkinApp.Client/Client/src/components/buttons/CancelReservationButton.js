@@ -48,7 +48,7 @@ const CancelReservationButton = ({
             <Button
                 variant="primary"
                 onClick={handleClick}
-                disabled={loading || userReservation === null}
+                disabled={loading || userReservation === null} 
             >
                 {loading ? "Cancelling..." : "Cancel Reservation"}
             </Button>

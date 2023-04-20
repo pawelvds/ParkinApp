@@ -10,12 +10,13 @@ const ReservationForm = ({
                              setUserReservation,
                              handleMessage,
                              currentUser,
+                             token,
                          }) => {
     const [loading, setLoading] = useState(false);
 
     const handleReserve = async () => {
         setLoading(true);
-        const token = AuthService.getAccessToken();
+
         if (!token) {
             handleMessage({
                 type: "alert-danger",
