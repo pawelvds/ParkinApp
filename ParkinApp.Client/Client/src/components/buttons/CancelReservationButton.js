@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { cancelReservation } from "../../services/ReservationService";
 import AuthService from "../../services/AuthService";
@@ -10,6 +10,11 @@ const CancelReservationButton = ({
                                      userReservation,
                                  }) => {
     const [loading, setLoading] = useState(false);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+    useEffect(() => {
+        setIsButtonDisabled(loading || userReservation === null);
+    }, [loading, userReservation]);
 
     const handleClick = async () => {
         setLoading(true);
@@ -40,7 +45,6 @@ const CancelReservationButton = ({
         } finally {
             setLoading(false);
         }
-
     };
 
     return (
@@ -48,7 +52,7 @@ const CancelReservationButton = ({
             <Button
                 variant="primary"
                 onClick={handleClick}
-                disabled={loading || userReservation === null} 
+                disabled={isButtonDisabled}
             >
                 {loading ? "Cancelling..." : "Cancel Reservation"}
             </Button>

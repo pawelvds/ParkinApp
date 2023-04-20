@@ -129,4 +129,3 @@ const Home = ({ currentUser, token }) => {
 };
 
 export default Home;
-
