@@ -68,6 +68,16 @@ const getCurrentUser = () => {
     return user;
 };
 
+const getAccessToken = () => {
+    const user = getCurrentUser();
+
+    if (user && user.accessToken) {
+        return user.accessToken;
+    }
+
+    return null;
+};
+
 const login = async (userName, password) => {
     try {
         const response = await axios.post(API_ENDPOINT + '/api/User/login', {
@@ -123,6 +133,7 @@ const AuthService = {
     refreshAccessToken,
     requestWithAuth,
     getCurrentUser,
+    getAccessToken,
     login,
     logout,
     register,

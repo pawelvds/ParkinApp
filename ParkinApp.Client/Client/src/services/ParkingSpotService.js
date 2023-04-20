@@ -7,6 +7,6 @@ const getParkingSpots = () => {
 
 const ParkingSpotService = {
     getParkingSpots
-}
+};
 
 export default ParkingSpotService;

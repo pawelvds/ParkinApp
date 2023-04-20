@@ -4,7 +4,7 @@ using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
-using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace ParkinApp.Services
 {
@@ -94,6 +94,32 @@ namespace ParkinApp.Services
 
             return Result<string>.Success("Reservation cancelled.");
         }
+        
+        public async Task<Result<OccupiedParkingSpotDto>> GetOccupiedParkingSpotAsync(int parkingSpotId)
+        {
+            var parkingSpot = await GetParkingSpotWithReservationsByIdAsync(parkingSpotId);
+            if (parkingSpot == null)
+            {
+                return Result<OccupiedParkingSpotDto>.Failure("Parking spot not found.");
+            }
+
+            var activeReservation = parkingSpot.Reservations.FirstOrDefault();
+
+            if (activeReservation == null)
+            {
+                return Result<OccupiedParkingSpotDto>.Failure("Parking spot is not reserved.");
+            }
+
+            var user = await _userRepository.GetByIdAsync(activeReservation.UserId);
+            if (user == null)
+            {
+                return Result<OccupiedParkingSpotDto>.Failure("User not found.");
+            }
+
+            var occupiedParkingSpotDto = new OccupiedParkingSpotDto(parkingSpotId, user.Login);
+            return Result<OccupiedParkingSpotDto>.Success(occupiedParkingSpotDto);
+        }
+
 
         private async Task RefreshParkingSpotCacheAsync(int parkingSpotId)
         {
@@ -121,6 +147,22 @@ namespace ParkinApp.Services
         {
             return $"{ParkingSpotCacheKeyPrefix}{parkingSpotId}";
         }
+
+        private async Task<ParkingSpot?> GetParkingSpotWithReservationsByIdAsync(int parkingSpotId)
+        {
+            if (!_cache.TryGetValue(GetParkingSpotCacheKey(parkingSpotId), out ParkingSpot? parkingSpot))
+            {
+                parkingSpot = await _parkingSpotRepository
+                    .GetQueryable()
+                    .Include(ps => ps.Reservations)
+                    .FirstOrDefaultAsync(ps => ps.Id == parkingSpotId);
+                _cache.Set(GetParkingSpotCacheKey(parkingSpotId), parkingSpot);
+            }
+
+            return parkingSpot;
+        }
+
+
     }
 
 }
