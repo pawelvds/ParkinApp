@@ -59,12 +59,23 @@ const Home = ({ currentUser, token }) => {
         return false;
     };
 
+    const getUserReservedSpotId = () => {
+        if (currentUser && parkingSpots.length > 0) {
+            const reservedSpot = parkingSpots.find(
+                (spot) => spot.reserved && spot.reservedBy === currentUser.username
+            );
+            return reservedSpot ? reservedSpot.id : null;
+        }
+        return null;
+    };
+
     const handleMessage = (msg) => {
         setMessage(msg);
         setTimeout(() => {
             setMessage(null);
         }, 3000);
     };
+
 
     return (
         <Container>
@@ -80,13 +91,14 @@ const Home = ({ currentUser, token }) => {
             ) : (
                 <>
                     <h2>Parking Spots:</h2>
-                    {userReservation ? (
+                    {getUserReservedSpotId() ? (
                         <p>
-                            Hi {currentUser.username}! You have reserved spot number {userReservation}.
+                            Hi {currentUser.username}! You have reserved spot number {getUserReservedSpotId()}.
                         </p>
                     ) : (
                         <p>Hi {currentUser.username}! You do not have any reservations. Choose an available spot.</p>
                     )}
+
                     {message && (
                         <div className={`alert ${message.type}`}>{message.content}</div>
                     )}
