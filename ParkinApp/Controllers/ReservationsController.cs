@@ -52,18 +52,5 @@ namespace ParkinApp.Controllers
             return BadRequest(result.Errors);
         }
         
-        [HttpGet("occupied/{parkingSpotId}")]
-        public async Task<IActionResult> GetOccupiedParkingSpot(int parkingSpotId)
-        {
-            var result = await _reservationService.GetOccupiedParkingSpotAsync(parkingSpotId);
-
-            if (result.IsSuccessful)
-            {
-                return Ok(result.Value);
-            }
-
-            return BadRequest(result.Errors);
-        }
-
     }
 }

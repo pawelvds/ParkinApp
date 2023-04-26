@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkinApp.Persistence", "Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkinApp", "ParkinApp\ParkinApp.csproj", "{F54CA405-255B-45EC-A657-B9AA998C9257}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkinApp.UnitTests", "ParkinApp.UnitTests\ParkinApp.UnitTests.csproj", "{36450A33-FDFB-4575-8F02-1FCBC6F91296}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{F54CA405-255B-45EC-A657-B9AA998C9257}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F54CA405-255B-45EC-A657-B9AA998C9257}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F54CA405-255B-45EC-A657-B9AA998C9257}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36450A33-FDFB-4575-8F02-1FCBC6F91296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36450A33-FDFB-4575-8F02-1FCBC6F91296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36450A33-FDFB-4575-8F02-1FCBC6F91296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36450A33-FDFB-4575-8F02-1FCBC6F91296}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

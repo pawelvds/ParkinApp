@@ -9,6 +9,5 @@ namespace ParkinApp.Domain.Abstractions.Services
         
         Task<Result<string>> CancelReservationAsync(string userId);
         
-        Task<Result<OccupiedParkingSpotDto>> GetOccupiedParkingSpotAsync(int parkingSpotId);
     }
 }
