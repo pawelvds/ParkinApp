@@ -9,6 +9,8 @@ namespace ParkinApp.Domain.Abstractions.Repositories
         IQueryable<ParkingSpot> GetQueryable();
         
         Task<List<ParkingSpot>> GetAllParkingSpotsWithReservationsAsync();
+        Task<ParkingSpot?> GetParkingSpotWithReservationsByIdAsync(int id);
+
 
     }
 }

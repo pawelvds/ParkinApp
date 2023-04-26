@@ -28,6 +28,14 @@ namespace ParkinApp.Persistence.Repositories
         {
             return await _context.ParkingSpots.Include(ps => ps.Reservations).ThenInclude(r => r.User).ToListAsync();
         }
+        
+        public async Task<ParkingSpot?> GetParkingSpotWithReservationsByIdAsync(int id)
+        {
+            return await _context.ParkingSpots
+                .Include(ps => ps.Reservations)
+                .FirstOrDefaultAsync(ps => ps.Id == id);
+        }
+
 
 
     }
