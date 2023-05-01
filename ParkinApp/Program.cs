@@ -27,6 +27,8 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 builder.Services.AddScoped<IParkingSpotCacheService, ParkingSpotCacheService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<WebSocketController>();
+
 builder.Services.AddValidatorsFromAssemblyContaining<CreateReservationDtoValidator>();
 
 

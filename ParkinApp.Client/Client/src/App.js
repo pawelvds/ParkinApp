@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import AuthService from "./services/AuthService";
 import Login from "./components/user/Login";
 import Register from "./components/user/Register";
@@ -9,6 +9,7 @@ import Navbar from "./components/layout/Navbar";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
@@ -16,8 +17,15 @@ function App() {
     if (user) {
       setCurrentUser(user);
     }
-  }, []);
 
+    // Connect to WebSocket server
+    const newSocket = new WebSocket("ws://localhost:5000");
+    setSocket(newSocket);
+
+    // Disconnect from WebSocket server on unmount
+    return () => newSocket.close();
+  }, []);
+  
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user && AuthService.isTokenExpired(user.accessToken)) {
@@ -42,7 +50,7 @@ function App() {
           <Routes>
             <Route
                 path="/home"
-                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()} />}
+                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()} socket={socket} />}
             />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

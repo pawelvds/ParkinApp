@@ -1,3 +1,4 @@
+// CancelReservationButton.js
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { cancelReservation } from "../../services/ReservationService";
@@ -32,7 +33,7 @@ const CancelReservationButton = ({
         try {
             const response = await cancelReservation(token);
             setUserReservation(null);
-            handleMessage({
+            handleMessage                ({
                 type: "alert-success",
                 content: "Reservation cancelled successfully!",
             });
@@ -61,3 +62,4 @@ const CancelReservationButton = ({
 };
 
 export default CancelReservationButton;
+
