@@ -3,10 +3,6 @@ using ParkinApp.Domain.Abstractions.Services;
 using ParkinApp.Domain.Common;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using ParkinApp.Validators;
 
 namespace ParkinApp.Services

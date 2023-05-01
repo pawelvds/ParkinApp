@@ -6,6 +6,7 @@ using ParkinApp.Persistence.Repositories;
 using ParkinApp.Services;
 using FluentValidation.AspNetCore;
 using ParkinApp.Application.Services;
+using ParkinApp.Controllers;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
 using ParkinApp.Middlewares;
@@ -54,7 +55,6 @@ builder.Services.AddCors(options =>
 });
 
 // Redis configuration
-// Redis configuration
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -73,13 +73,23 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseWebSockets();
+
 app.UseRouting();
+app.UseWebSocketMiddleware(async context =>
+{
+    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+    var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+    var logger = loggerFactory.CreateLogger<WebSocketController>();
+    var reservationService = context.RequestServices.GetService<IReservationService>();
+    var webSocketController = new WebSocketController(logger, reservationService);
+    await webSocketController.HandleWebSocketAsync(context, webSocket);
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors("AllowReactApp");
-
 
 app.MapControllers();
 
