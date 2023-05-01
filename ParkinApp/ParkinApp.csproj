@@ -19,7 +19,11 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
         <PackageReference Include="Moq" Version="4.18.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="RedLock" Version="8.2.1" />
+        <PackageReference Include="RedLock.net" Version="2.3.2" />
+        <PackageReference Include="RedlockDotNet.Redis" Version="1.1.0" />
         <PackageReference Include="Shouldly" Version="4.2.1" />
+        <PackageReference Include="StackExchange.Redis" Version="2.6.104" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
