@@ -21,15 +21,13 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IHostedService, CleanupExpiredReservations>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 builder.Services.AddScoped<IParkingSpotCacheService, ParkingSpotCacheService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
-builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
-builder.Services.AddScoped<IValidator<ParkingSpot>, ParkingSpotValidator>();
-builder.Services.AddScoped<IValidator<CreateReservationDto>, CreateReservationDtoValidator>();
-builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateReservationDtoValidator>();
+
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
