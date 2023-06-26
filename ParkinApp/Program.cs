@@ -27,7 +27,7 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IParkingSpotService, ParkingSpotService>();
 builder.Services.AddScoped<IParkingSpotCacheService, ParkingSpotCacheService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<WebSocketController>();
+
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateReservationDtoValidator>();
 
@@ -78,15 +78,7 @@ app.UseHttpsRedirection();
 app.UseWebSockets();
 
 app.UseRouting();
-app.UseWebSocketMiddleware(async context =>
-{
-    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-    var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
-    var logger = loggerFactory.CreateLogger<WebSocketController>();
-    var reservationService = context.RequestServices.GetService<IReservationService>();
-    var webSocketController = new WebSocketController(logger, reservationService);
-    await webSocketController.HandleWebSocketAsync(context, webSocket);
-});
+
 
 app.UseAuthentication();
 app.UseAuthorization();
