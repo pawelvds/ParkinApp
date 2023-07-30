@@ -9,22 +9,23 @@ import Navbar from "./components/layout/Navbar";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const user = AuthService.getCurrentUser();
+    const getCurrentUser = async () => {
+      try {
+        const user = await AuthService.getCurrentUser();
 
-    if (user) {
-      setCurrentUser(user);
-    }
+        if (user) {
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error("Error getting current user:", error);
+      }
+    };
 
-    // Connect to WebSocket server
-    const newSocket = new WebSocket("ws://localhost:5000");
-    setSocket(newSocket);
-
-    // Disconnect from WebSocket server on unmount
-    return () => newSocket.close();
+    getCurrentUser();
   }, []);
+
   
   useEffect(() => {
     const user = AuthService.getCurrentUser();
@@ -50,7 +51,7 @@ function App() {
           <Routes>
             <Route
                 path="/home"
-                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()} socket={socket} />}
+                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()}/>}
             />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

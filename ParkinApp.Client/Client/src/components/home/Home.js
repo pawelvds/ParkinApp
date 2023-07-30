@@ -5,7 +5,6 @@ import OccupiedFreeSpots from "./Counter";
 import ParkingSpotCard from "./ParkingSpotCard";
 import CancelReservation from "./CancelReservation";
 import AuthService from "../../services/AuthService";
-import WebSocketService from "../../services/WebSocketService";
 
 const Home = ({ currentUser, token }) => {
     const [parkingSpots, setParkingSpots] = useState([]);
@@ -52,20 +51,6 @@ const Home = ({ currentUser, token }) => {
             }
         }
     }, [parkingSpots, currentUser]);
-
-    const handleWebSocketMessage = (message) => {
-        const parsedMessage = JSON.parse(message);
-        const { action, data } = parsedMessage;
-
-        if (action === "reserve" || action === "cancel") {
-            refreshSpots();
-        }
-    };
-
-    useEffect(() => {
-        WebSocketService.addListener(handleWebSocketMessage);
-        return () => WebSocketService.removeListener(handleWebSocketMessage);
-    }, []);
 
     const isUserSpotReserved = (parkingSpot) => {
         if (currentUser) {
