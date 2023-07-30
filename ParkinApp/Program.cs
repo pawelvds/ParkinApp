@@ -9,6 +9,7 @@ using ParkinApp.Application.Services;
 using ParkinApp.Controllers;
 using ParkinApp.Domain.DTOs;
 using ParkinApp.Domain.Entities;
+using ParkinApp.Hubs;
 using ParkinApp.Middlewares;
 using ParkinApp.Validators;
 using StackExchange.Redis;
@@ -62,6 +63,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -86,5 +89,8 @@ app.UseAuthorization();
 app.UseCors("AllowReactApp");
 
 app.MapControllers();
+
+// Map SignalR hubs to endpoints
+app.MapHub<ParkingSpotHub>("hubs/parkingSpotHub");
 
 app.Run();
