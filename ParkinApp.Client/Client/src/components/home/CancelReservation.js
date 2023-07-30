@@ -1,3 +1,4 @@
+// CancelReservation.js
 import React from "react";
 import CancelReservationButton from "../buttons/CancelReservationButton";
 

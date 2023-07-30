@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ParkingSpotService from "../../services/ParkingSpotService";
+import SignalRService from "../../services/SignalRService";
 import { Container, Row } from "react-bootstrap";
 import OccupiedFreeSpots from "./Counter";
 import ParkingSpotCard from "./ParkingSpotCard";
@@ -52,6 +53,19 @@ const Home = ({ currentUser, token }) => {
         }
     }, [parkingSpots, currentUser]);
 
+    useEffect(() => {
+        const signalRService = new SignalRService();
+        const connection = signalRService.startConnection();
+        
+        connection.on("ReceiveParkingSpotStatus", () => {
+            refreshSpots();
+        });
+
+        return () => {
+            signalRService.stopConnection();
+        };
+    }, []);
+
     const isUserSpotReserved = (parkingSpot) => {
         if (currentUser) {
             return parkingSpot.reserved && parkingSpot.reservedBy.id === currentUser.id;
@@ -75,7 +89,6 @@ const Home = ({ currentUser, token }) => {
             setMessage(null);
         }, 3000);
     };
-
 
     return (
         <Container>
@@ -102,26 +115,30 @@ const Home = ({ currentUser, token }) => {
                     {message && (
                         <div className={`alert ${message.type}`}>{message.content}</div>
                     )}
+
                     <Row>
                         {parkingSpots.map((parkingSpot) => (
                             <ParkingSpotCard
                                 key={parkingSpot.id}
                                 parkingSpot={parkingSpot}
+                                reserved={isUserSpotReserved(parkingSpot)}
                                 refreshSpots={refreshSpots}
-                                handleMessage={handleMessage}
                                 setUserReservation={setUserReservation}
+                                handleMessage={handleMessage}
                                 currentUser={currentUser}
                                 token={token}
-                                isUserSpotReserved={isUserSpotReserved}
                             />
                         ))}
                     </Row>
-                    <CancelReservation
-                        refreshSpots={refreshSpots}
-                        handleMessage={handleMessage}
-                        setUserReservation={setUserReservation}
-                        userReservation={userReservation}
-                    />
+
+                    {currentUser && (
+                        <CancelReservation
+                            refreshSpots={refreshSpots}
+                            handleMessage={handleMessage}
+                            setUserReservation={setUserReservation}
+                            userReservation={userReservation}
+                        />
+                    )}
                 </>
             )}
         </Container>

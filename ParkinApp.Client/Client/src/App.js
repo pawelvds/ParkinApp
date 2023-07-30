@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import AuthService from "./services/AuthService";
 import Login from "./components/user/Login";
 import Register from "./components/user/Register";
@@ -11,13 +11,22 @@ function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
 
   useEffect(() => {
-    const user = AuthService.getCurrentUser();
+    const getCurrentUser = async () => {
+      try {
+        const user = await AuthService.getCurrentUser();
 
-    if (user) {
-      setCurrentUser(user);
-    }
+        if (user) {
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error("Error getting current user:", error);
+      }
+    };
+
+    getCurrentUser();
   }, []);
 
+  
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user && AuthService.isTokenExpired(user.accessToken)) {
@@ -42,7 +51,7 @@ function App() {
           <Routes>
             <Route
                 path="/home"
-                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()} />}
+                element={<Home currentUser={currentUser} token={AuthService.getAccessToken()}/>}
             />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

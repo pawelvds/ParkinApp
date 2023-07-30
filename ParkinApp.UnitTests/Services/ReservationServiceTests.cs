@@ -56,5 +56,62 @@ namespace ParkinApp.UnitTests.Services
 
             _parkingSpotCacheServiceMock.Verify(p => p.UpdateParkingSpotCache(parkingSpot), Times.Once);
         }
+        
+        [Fact]
+        public async Task CreateReservationAsync_WhenUserHasActiveReservation_ReturnsFailure()
+        {
+            // Arrange
+            var parkingSpotId = 1;
+            var userId = 1;
+            var username = "testUser";
+            var user = new User { Id = userId };
+            var activeReservation = new Reservation();
+
+            _userRepositoryMock.Setup(u => u.GetUserByUsernameAsync(username)).ReturnsAsync(user);
+            _reservationRepositoryMock.Setup(r => r.GetActiveReservationByUserIdAsync(userId)).ReturnsAsync(activeReservation);
+
+            var reservationService = new ReservationService(
+                _parkingSpotRepositoryMock.Object,
+                _userRepositoryMock.Object,
+                _reservationRepositoryMock.Object,
+                _parkingSpotCacheServiceMock.Object);
+
+            // Act
+            var reservationDto = new CreateReservationDto(parkingSpotId);
+            var result = await reservationService.CreateReservationAsync(reservationDto, username);
+
+            // Assert
+            result.IsSuccessful.ShouldBeFalse();
+            result.Errors.ShouldContain("User already has an active reservation.");
+        }
+        
+        [Fact]
+        public async Task CreateReservationAsync_WhenParkingSpotDoesNotExist_ReturnsFailure()
+        {
+            // Arrange
+            var parkingSpotId = 1;
+            var userId = 1;
+            var username = "testUser";
+            var user = new User { Id = userId };
+
+            _userRepositoryMock.Setup(u => u.GetUserByUsernameAsync(username)).ReturnsAsync(user);
+            _parkingSpotCacheServiceMock.Setup(p => p.GetParkingSpotByIdAsync(parkingSpotId, It.IsAny<IParkingSpotRepository>())).ReturnsAsync((ParkingSpot)null);
+
+            var reservationService = new ReservationService(
+                _parkingSpotRepositoryMock.Object,
+                _userRepositoryMock.Object,
+                _reservationRepositoryMock.Object,
+                _parkingSpotCacheServiceMock.Object);
+
+            // Act
+            var reservationDto = new CreateReservationDto(parkingSpotId);
+            var result = await reservationService.CreateReservationAsync(reservationDto, username);
+
+            // Assert
+            result.IsSuccessful.ShouldBeFalse();
+            result.Errors.ShouldContain("Parking spot not found.");
+        }
+        
+       
     }
 }
