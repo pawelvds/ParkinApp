@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ParkingSpotService from "../../services/ParkingSpotService";
+import SignalRService from "../../services/SignalRService";
 import { Container, Row } from "react-bootstrap";
 import OccupiedFreeSpots from "./Counter";
 import ParkingSpotCard from "./ParkingSpotCard";
@@ -51,6 +52,19 @@ const Home = ({ currentUser, token }) => {
             }
         }
     }, [parkingSpots, currentUser]);
+
+    useEffect(() => {
+        const signalRService = new SignalRService();
+        const connection = signalRService.startConnection();
+        
+        connection.on("ReceiveParkingSpotStatus", () => {
+            refreshSpots();
+        });
+
+        return () => {
+            signalRService.stopConnection();
+        };
+    }, []);
 
     const isUserSpotReserved = (parkingSpot) => {
         if (currentUser) {
